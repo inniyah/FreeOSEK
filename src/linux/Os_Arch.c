@@ -1,7 +1,3 @@
-/********************************************************
- * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
- ********************************************************/
-
 /* Copyright 2008, 2009 Mariano Cerdeiro
  * Copyright 2014, ACSE & CADIEEL
  *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
@@ -37,9 +33,10 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
+/** \brief FreeOSEK Os Arch Implementation File
  **
- ** \file Os_Cfg.c
+ ** \file x86/Os_Arch.c
+ ** \arch x86
  **/
 
 /** \addtogroup FreeOSEK
@@ -59,31 +56,37 @@
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
-{
-?>
-unsigned int Osek_ErrorApi;
-
-uintptr_t Osek_ErrorParam1;
-
-uintptr_t Osek_ErrorParam2;
-
-uintptr_t Osek_ErrorParam3;
-
-unsigned int Osek_ErrorRet;
-
-<?php
-}
-?>
 
 /*==================[external data definition]===============================*/
+InterruptFlagsType InterruptMask;
+
+InterruptStateType InterruptState;
 
 /*==================[internal functions definition]==========================*/
 
 /*==================[external functions definition]==========================*/
+void ScheduleInterrupts(void)
+{
+   int loopi = 0;
+   uint32 InterruptToBeExecuted;
+
+   if (InterruptState)
+   {
+      InterruptToBeExecuted = ( InterruptFlag & ( (InterruptFlagsType) ~InterruptMask ) );
+      while(InterruptToBeExecuted != 0)
+      {
+         if (InterruptToBeExecuted & 1)
+         {
+            InterruptFlag &= ~(1<<loopi);
+
+            InterruptTable[loopi]();
+         }
+
+         InterruptToBeExecuted >>=1;
+         loopi++;
+      }
+   }
+}
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */

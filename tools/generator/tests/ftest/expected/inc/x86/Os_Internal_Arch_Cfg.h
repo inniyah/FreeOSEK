@@ -37,56 +37,57 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
+#ifndef _OS_INTERNAL_ARCH_CFG_H_
+#define _OS_INTERNAL_ARCH_CFG_H_
+/** \brief FreeOSEK Os Generated Internal Architecture Configuration Header File
  **
- ** \file Os_Cfg.c
+ ** This file content the internal generated architecture dependent
+ ** configuration of FreeOSEK Os.
+ **
+ ** \file Os_Internal_Arch_Cfg.h
  **/
 
 /** \addtogroup FreeOSEK
  ** @{ */
 /** \addtogroup FreeOSEK_Os
  ** @{ */
-/** \addtogroup FreeOSEK_Os_Global
+/** \addtogroup FreeOSEK_Os_Internal
  ** @{ */
 
 /*==================[inclusions]=============================================*/
-#include "Os_Internal.h"
 
-/*==================[macros and definitions]=================================*/
+/*==================[macros]=================================================*/
+#define INTERRUPTS_COUNT      32
 
-/*==================[internal data declaration]==============================*/
+/*==================[typedef]================================================*/
+/** \brief Task Context Type */
+#if ( CPUTYPE == ia64 )
+typedef struct {
+   uint64 tss_rsp;
+   uint64 tss_rbp;
+   uint64 tss_rip;
+} TaskContextType;
+#elif ( CPUTYPE == ia32 )
+typedef struct {
+   uint32 tss_esp;
+   uint32 tss_ebp;
+   uint32 tss_eip;
+} TaskContextType;
+#endif
 
-/*==================[internal functions declaration]=========================*/
+/** \brief Task Context Type */
+typedef TaskContextType* TaskContextRefType;
 
-/*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
-{
-?>
-unsigned int Osek_ErrorApi;
+/** \brief InterruptType Type definition */
+typedef void (*InterruptType)(void);
 
-uintptr_t Osek_ErrorParam1;
+/*==================[external data declaration]==============================*/
+extern InterruptType InterruptTable[INTERRUPTS_COUNT];
 
-uintptr_t Osek_ErrorParam2;
-
-uintptr_t Osek_ErrorParam3;
-
-unsigned int Osek_ErrorRet;
-
-<?php
-}
-?>
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-/*==================[external functions definition]==========================*/
+/*==================[external functions declaration]=========================*/
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
-
+#endif /* #ifndef _OS_INTERNAL_ARCH_CFG_H_ */

@@ -1,7 +1,4 @@
-/********************************************************
- * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
- ********************************************************/
-
+<?php
 /* Copyright 2008, 2009 Mariano Cerdeiro
  * Copyright 2014, ACSE & CADIEEL
  *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
@@ -37,56 +34,27 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
- **
- ** \file Os_Cfg.c
- **/
+require_once ("config.php");
 
-/** \addtogroup FreeOSEK
- ** @{ */
-/** \addtogroup FreeOSEK_Os
- ** @{ */
-/** \addtogroup FreeOSEK_Os_Global
- ** @{ */
+$this->config->parseOilFile("example.oil");
 
-/*==================[inclusions]=============================================*/
-#include "Os_Internal.h"
+#$this->config->dump();
 
-/*==================[macros and definitions]=================================*/
+print "Tasks: " . $this->config->getCount("/OSEK","TASK") . "\n";
+print "TasksK List:\n";
 
-/*==================[internal data declaration]==============================*/
+$tasks = $this->config->getList("/OSEK","TASK");
 
-/*==================[internal functions declaration]=========================*/
+$task_count=0;
 
-/*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
+foreach ($tasks as $task)
 {
-?>
-unsigned int Osek_ErrorApi;
-
-uintptr_t Osek_ErrorParam1;
-
-uintptr_t Osek_ErrorParam2;
-
-uintptr_t Osek_ErrorParam3;
-
-unsigned int Osek_ErrorRet;
-
-<?php
+   print "Task " . $task_count++ . " Location " . $task . "\n";
+   $attributes = $this->config->getAttributes($task,"*");
+   foreach ($attributes as $attr)
+   {
+      print $attr . ": " . $this->config->getValue($task, $attr) . "\n";
+   }
 }
+
 ?>
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-/*==================[external functions definition]==========================*/
-
-/** @} doxygen end group definition */
-/** @} doxygen end group definition */
-/** @} doxygen end group definition */
-/*==================[end of file]============================================*/
-

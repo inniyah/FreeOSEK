@@ -2,10 +2,8 @@
  * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
  ********************************************************/
 
-/* Copyright 2008, 2009 Mariano Cerdeiro
- * Copyright 2014, ACSE & CADIEEL
- *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
- *      CADIEEL: http://www.cadieel.org.ar
+/* Copyright 2014 Mariano Cerdeiro
+ * All rights reserved.
  *
  * This file is part of CIAA Firmware.
  *
@@ -37,16 +35,17 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
+/** \brief FreeOSEK Os Generated Internal Achitecture Configuration Implementation File
  **
- ** \file Os_Cfg.c
+ ** \file mips/Os_Internal_Arch_Cfg.c
+ ** \arch mips
  **/
 
 /** \addtogroup FreeOSEK
  ** @{ */
 /** \addtogroup FreeOSEK_Os
  ** @{ */
-/** \addtogroup FreeOSEK_Os_Global
+/** \addtogroup FreeOSEK_Os_Internal
  ** @{ */
 
 /*==================[inclusions]=============================================*/
@@ -59,25 +58,6 @@
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
-{
-?>
-unsigned int Osek_ErrorApi;
-
-uintptr_t Osek_ErrorParam1;
-
-uintptr_t Osek_ErrorParam2;
-
-uintptr_t Osek_ErrorParam3;
-
-unsigned int Osek_ErrorRet;
-
-<?php
-}
-?>
 
 /*==================[external data definition]===============================*/
 

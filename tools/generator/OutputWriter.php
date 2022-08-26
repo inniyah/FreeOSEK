@@ -1,11 +1,6 @@
-/********************************************************
- * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
- ********************************************************/
-
-/* Copyright 2008, 2009 Mariano Cerdeiro
- * Copyright 2014, ACSE & CADIEEL
- *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
- *      CADIEEL: http://www.cadieel.org.ar
+<?php
+ /* Copyright 2015, Carlos Pantelides
+ * All rights reserved.
  *
  * This file is part of CIAA Firmware.
  *
@@ -37,56 +32,69 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
+/** \brief FreeOSEK Generator
  **
- ** \file Os_Cfg.c
+ ** This file implements a Writer utility
+ **
+ ** \file OutputWriter.php
+ **
  **/
 
 /** \addtogroup FreeOSEK
  ** @{ */
-/** \addtogroup FreeOSEK_Os
+/** \addtogroup Generator
  ** @{ */
-/** \addtogroup FreeOSEK_Os_Global
- ** @{ */
-
-/*==================[inclusions]=============================================*/
-#include "Os_Internal.h"
-
-/*==================[macros and definitions]=================================*/
-
-/*==================[internal data declaration]==============================*/
-
-/*==================[internal functions declaration]=========================*/
-
-/*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
+abstract class OutputWriter
 {
-?>
-unsigned int Osek_ErrorApi;
+   protected $buffering = false;
 
-uintptr_t Osek_ErrorParam1;
+   private $flushed = false;
 
-uintptr_t Osek_ErrorParam2;
+   protected $log = null;
 
-uintptr_t Osek_ErrorParam3;
+   abstract function close();
 
-unsigned int Osek_ErrorRet;
+   abstract function ob_file_callback($buffer);
 
-<?php
+   abstract function printMsg($msg);
+
+   public function flush()
+   {
+      if (! $this->flushed)
+      {
+         ob_end_flush();
+         $this->flushed = true;
+      }
+   }
+
+   public function start()
+   {
+      ob_start(array($this, 'ob_file_callback'));
+      $this->buffering = true;
+      $this->flushed = false;
+   }
+
+   public function pause()
+   {
+      if($this->buffering == true )
+      {
+         $this->flush();
+      }
+   }
+
+   public function resume()
+   {
+      if($this->buffering == true)
+      {
+         $this->start();
+      }
+   }
+
+   public function setLog($log)
+   {
+      $this->log = $log;
+   }
 }
-?>
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-/*==================[external functions definition]==========================*/
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
-/** @} doxygen end group definition */
-/*==================[end of file]============================================*/
-

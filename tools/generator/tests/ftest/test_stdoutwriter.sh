@@ -1,9 +1,5 @@
-##############################################################################
-#
-# Copyright 2008, 2009 Mariano Cerdeiro
-# Copyright 2014, ACSE & CADIEEL
-#      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
-#      CADIEEL: http://www.cadieel.org.ar
+# Copyright 2015, Carlos Pantelides
+# All rights reserved.
 #
 # This file is part of CIAA Firmware.
 #
@@ -15,7 +11,7 @@
 #
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
+#    and${DS}or other materials provided with the distribution.
 #
 # 3. Neither the name of the copyright holder nor the names of its
 #    contributors may be used to endorse or promote products derived from this
@@ -32,13 +28,27 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-#
-##############################################################################
-# add library
-#
-OPENOSEK_OBJ +=	Os_Internal_Arch_Cpu.o
 
-VPATH		 +=	FreeOSEK$(DIR)Os$(DIR)src$(DIR)$(ARCH)$(DIR)$(CPUTYPE)
-INCLUDE      +=	-IFreeOSEK$(DIR)Os$(DIR)inc$(DIR)$(ARCH)$(DIR)$(CPUTYPE)
+testNoFileOutput() {
+   local OUTPUT=$(php modules${DS}tools${DS}generator${DS}tests${DS}ftest${DS}stdoutWriterLauncher.php  -DARCH=x86 -DCPUTYPE=ia32 -DCPU=none \
+      -c ${FIXTURES}${DS}blinking.oil \
+      -t ${FIXTURES}${DS}gen${DS}inc${DS}Os_Internal_Cfg.h.php \
+      -H modules${DS}rtos${DS}gen${DS}ginc${DS}Multicore.php \
+      -b ${DS}gen${DS} \
+      -o ${TMP})
 
+   assertEquals "${TMP}${DS}" $(find ${TMP}${DS} -not -name .gitignore)
+   rm -rf ${TMP}${DS}*
+}
+
+
+SHUNIT=$1
+TESTS=$2
+DS=$3
+FIXTURES=$4
+EXPECTED=$5
+TMP=$6
+
+shift $#
+
+. ${SHUNIT}

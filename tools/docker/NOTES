@@ -1,0 +1,69 @@
+SYSTEM CONFIGURATION:
+
+# Install the qemu packages
+sudo apt-get install qemu binfmt-support qemu-user-static
+
+# Execute the registering scripts
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+( See: https://www.stereolabs.com/docs/docker/building-arm-container-on-x86/ )
+
+
+CREATE DOCKER:
+
+docker build \
+	--build-arg UNAME="$(id -un)" \
+	--build-arg UID="$(id -u)" \
+	--build-arg GID="$(id -g)" \
+	--rm -f Dockerfile -t freeosek .
+
+( See: https://hub.docker.com/_/debian )
+
+docker build \
+	--build-arg UNAME="$(id -un)" \
+	--build-arg UID="$(id -u)" \
+	--build-arg GID="$(id -g)" \
+	--rm -f Dockerfile.arm32v7 -t freeosek.arm32v7 .
+
+( See: https://hub.docker.com/u/arm32v7/ )
+( See: https://hub.docker.com/r/arm32v7/debian/ )
+
+
+docker build \
+	--build-arg UNAME="$(id -un)" \
+	--build-arg UID="$(id -u)" \
+	--build-arg GID="$(id -g)" \
+	--rm -f Dockerfile.arm64v8 -t freeosek.arm64v8 .
+
+( See: https://hub.docker.com/u/arm64v8/ )
+( See: https://hub.docker.com/r/arm64v8/debian/ )
+
+
+ENTER DOCKER:
+
+docker run --rm -it \
+	-v "/home":"/home":Z \
+	-v "/lib/modules":"/lib/modules":ro  \
+	--device /dev/fuse \
+	--cap-add SYS_ADMIN \
+	--security-opt apparmor:unconfined \
+	--entrypoint /bin/bash \
+	freeosek:latest
+
+docker run --rm -it \
+	-v "/home":"/home":Z \
+	-v "/lib/modules":"/lib/modules":ro  \
+	--device /dev/fuse \
+	--cap-add SYS_ADMIN \
+	--security-opt apparmor:unconfined \
+	--entrypoint /bin/bash \
+	freeosek.arm32v7:latest
+
+docker run --rm -it \
+	-v "/home":"/home":Z \
+	-v "/lib/modules":"/lib/modules":ro  \
+	--device /dev/fuse \
+	--cap-add SYS_ADMIN \
+	--security-opt apparmor:unconfined \
+	--entrypoint /bin/bash \
+	freeosek.arm64v8:latest

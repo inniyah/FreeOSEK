@@ -2,7 +2,7 @@
  * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
  ********************************************************/
 
-/* Copyright 2008, 2009, 2015 Mariano Cerdeiro
+/* Copyright 2008, 2009 Mariano Cerdeiro
  * Copyright 2014, ACSE & CADIEEL
  *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
  *      CADIEEL: http://www.cadieel.org.ar
@@ -71,33 +71,15 @@
 #define OSEK_OS_INTERRUPT_MASK ((InterruptFlagsType)0xFFFFFFFFU)
 
 <?php
-
-$this->loadHelper("gen/ginc/Multicore.php");
-
 /* Definitions of Tasks */
-$tasks = $this->helper->multicore->getLocalList("/OSEK", "TASK");
-$remote_tasks = $this->helper->multicore->getRemoteList("/OSEK", "TASK");
-$os = $this->config->getList("/OSEK","OS");
+$tasks = $this->config->getList("/OSEK","TASK");
 
-$count = 0;
-foreach ($tasks as $task)
+foreach ($tasks as $count=>$task)
 {
    print "/** \brief Task Definition */\n";
    print "#define $task $count\n";
-   $count++;
 }
 print "\n";
-
-if (count($remote_tasks) > 0)
-{
-   foreach ($remote_tasks as $task)
-   {
-      print "/** \brief Remote Task Definition */\n";
-      print "#define $task $count\n";
-      $count++;
-   }
-   print "\n";
-}
 
 /* Define the Applications Modes */
 $appmodes = $this->config->getList("/OSEK","APPMODE");
@@ -130,7 +112,7 @@ foreach ($resources as $count=>$resource)
 print "\n";
 
 /* Define the Alarms */
-$alarms = $this->helper->multicore->getLocalList("/OSEK", "ALARM");
+$alarms = $this->config->getList("/OSEK","ALARM");
 
 foreach ($alarms as $count=>$alarm)
 {
@@ -140,7 +122,7 @@ foreach ($alarms as $count=>$alarm)
 print "\n";
 
 /* Define the Counters */
-$counters = $this->helper->multicore->getLocalList("/OSEK", "COUNTER");
+$counters = $this->config->getList("/OSEK","COUNTER");
 
 foreach ($counters as $count=>$counter)
 {
@@ -148,6 +130,8 @@ foreach ($counters as $count=>$counter)
    print "#define " . $counter . " " . $count . "\n";
 }
 print "\n";
+
+$os = $this->config->getList("/OSEK","OS");
 
 $errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
 if ($errorhook == "TRUE")
@@ -188,35 +172,9 @@ else
    print "#define OSEK_MEMMAP OSEK_DISABLE\n";
 }
 
-$osattr = $this->config->getValue("/OSEK/" . $os[0],"STATUS");
-if ($osattr == "EXTENDED") : ?>
-/** \brief Schedule this Task if higher priority Task are Active
- **
- ** \remarks if the system is configured with extended errors the
- **          function Schedule is implemented as a macro and calls the
- **          internal function Schedule_Int. If Standard errores are
- **          configured the function Schedule is implemented as a function.
- **
- ** This API shall Schedule the calling Task if a higher priority Task
- ** is active. This API shall only be used from non preemtive tasks.
- **
- ** \return E_OK if no error
- ** \return E_OS_CALLEVEL if call at interrupt level
- ** \return E_OS_RESOURCE if the calling task occupies resources
- **/
-#define Schedule() Schedule_Int(TRUE)
-<?php
-   endif;
 ?>
 
 /*==================[typedef]================================================*/
-/** \brief Type definition of StatusType
- **
- ** This type is used to represent the status returned by all FreeOSEK APIs
- **/
-/* \req OSEK_SYS_1.1 */
-typedef unsigned char StatusType;
-
 
 /*==================[external data declaration]==============================*/
 <?php
@@ -235,21 +193,21 @@ extern unsigned int Osek_ErrorApi;
  ** This variable contents the first parameter passed to the api which has
  ** generted the last error.
  **/
-extern uintptr_t Osek_ErrorParam1;
+extern unsigned int Osek_ErrorParam1;
 
 /** \brief Error Param2 Variable
  **
  ** This variable contents the second parameter passed to the api which has
  ** generted the last error.
  **/
-extern uintptr_t Osek_ErrorParam2;
+extern unsigned int Osek_ErrorParam2;
 
 /** \brief Error Param3 Variable
  **
  ** This variable contents the third parameter passed to the api which has
  ** generted the last error.
  **/
-extern uintptr_t Osek_ErrorParam3;
+extern unsigned int Osek_ErrorParam3;
 
 /** \brief Error Return Variable
  **
@@ -304,8 +262,7 @@ foreach ($tasks as $count=>$task)
 }
 print "\n";
 
-$intnames = $this->helper->multicore->getLocalList("/OSEK", "ISR");
-
+$intnames = $this->config->getList("/OSEK","ISR");
 foreach ($intnames as $count=>$int)
 {
    print "/** \brief ISR Declaration */\n";
@@ -313,8 +270,7 @@ foreach ($intnames as $count=>$int)
 }
 print "\n";
 
-$alarms = $this->helper->multicore->getLocalList("/OSEK", "ALARM");
-
+$alarms = $this->config->getList("/OSEK","ALARM");
 foreach ($alarms as $count=>$alarm)
 {
    $action = $this->config->getValue("/OSEK/" . $alarm, "ACTION");
@@ -326,33 +282,7 @@ foreach ($alarms as $count=>$alarm)
 }
 print "\n";
 
-$osattr = $this->config->getValue("/OSEK/" . $os[0],"STATUS"); ?>
-/** \brief Schedule this Task if higher priority Task are Active
- **
- ** This API shall Schedule the calling Task if a higher priority Task
- ** is active. This API shall only be used from non preemtive tasks.
- **
- ** \remarks This interface may be used by the end user over the
- **          macro Schedule or from the system itself. Therefore
- **          the parameter PerformChecks is provided. When
- **          the user calls the scheduler the checks shall be
- **          performed if the error checking is set as extended.
- **          If the system calls the Schedule no error checking
- **          shall be performed, the system shall be trusted.
- **
- ** \param[in] PerformChecks indicates if the function shall or not
- **                          perform the extended checks. This parameter
- **                          is only available if the error checks are set
- **                          to extended.
- ** \return E_OK if no error
- ** \return E_OS_CALLEVEL if call at interrupt level
- ** \return E_OS_RESOURCE if the calling task occupies resources
- **/
-<?php if ($osattr == "EXTENDED") : ?>
-extern StatusType Schedule_Int(boolean PerformChecks);
-<?php elseif ($osattr == "STANDARD") : ?>
-extern StatusType Schedule(void);
-<?php endif; ?>
+?>
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */

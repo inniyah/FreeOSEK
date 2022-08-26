@@ -1,11 +1,10 @@
-/********************************************************
- * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
- ********************************************************/
-
-/* Copyright 2008, 2009 Mariano Cerdeiro
+<?php
+/* Copyright 2008, 2009, 2015 Mariano Cerdeiro
  * Copyright 2014, ACSE & CADIEEL
  *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
  *      CADIEEL: http://www.cadieel.org.ar
+ * Copyright 2015, Carlos Pantelides
+ * All rights reserved.
  *
  * This file is part of CIAA Firmware.
  *
@@ -37,56 +36,28 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
+/** \brief FreeOSEK Generator caller
  **
- ** \file Os_Cfg.c
+ ** This file implements the FreeOSEK Generator caller
+ **
+ ** \file generator.php
+ **
  **/
 
 /** \addtogroup FreeOSEK
  ** @{ */
-/** \addtogroup FreeOSEK_Os
+/** \addtogroup Generator
  ** @{ */
-/** \addtogroup FreeOSEK_Os_Global
- ** @{ */
+
 
 /*==================[inclusions]=============================================*/
-#include "Os_Internal.h"
+require_once(dirname(__FILE__) . '/../../StdoutWriter.php');
+require_once(dirname(__FILE__) . '/../../OilGenerator.php');
+/*=================[user functions]============================================*/
 
-/*==================[macros and definitions]=================================*/
+$generator = new OilGenerator(new StdoutWriter());
+$generator->run($_SERVER['argv']);
 
-/*==================[internal data declaration]==============================*/
-
-/*==================[internal functions declaration]=========================*/
-
-/*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
-{
-?>
-unsigned int Osek_ErrorApi;
-
-uintptr_t Osek_ErrorParam1;
-
-uintptr_t Osek_ErrorParam2;
-
-uintptr_t Osek_ErrorParam3;
-
-unsigned int Osek_ErrorRet;
-
-<?php
-}
-?>
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-/*==================[external functions definition]==========================*/
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
-/** @} doxygen end group definition */
-/*==================[end of file]============================================*/
-

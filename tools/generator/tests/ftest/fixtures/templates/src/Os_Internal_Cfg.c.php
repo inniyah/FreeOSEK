@@ -2,7 +2,7 @@
  * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
  ********************************************************/
 
-/* Copyright 2008, 2009, 2014, 2015, 2017 Mariano Cerdeiro
+/* Copyright 2008, 2009, 2014 Mariano Cerdeiro
  * Copyright 2014, ACSE & CADIEEL
  *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
  *      CADIEEL: http://www.cadieel.org.ar
@@ -61,61 +61,17 @@
 
 /*==================[internal data definition]===============================*/
 <?php
-
-$this->loadHelper("gen/ginc/Multicore.php");
-
 /* get tasks */
-$tasks = $this->helper->multicore->getLocalList("/OSEK", "TASK");
-
-$os = $this->config->getList("/OSEK","OS");
-$osstack = $this->config->getValue("/OSEK/" . $os[0],"STACKCHECK");
-
-/* this amount of bytes (10% of all stacks) will be used as an insurance
- * if a stack overflow occurrs */
-$size_of_stack_dummy = 0;
-
-if ( ($osstack == "OVERFLOW") || ($osstack == "OVERFLOW_SIZE")) {
-
-   /* calculate the size of all stacks */
-   $size_of_all_stacks = 0;
-   foreach ($tasks as $task)
-   {
-      $size_of_all_stacks += $this->config->getValue("/OSEK/" . $task, "STACK");
-   }
-   /* use a /10 of that value as insurnace if a StackOverflow occurrs */
-   $size_of_stack_dummy = round($size_of_all_stacks/10);
-
-?>
-/* All stacks are 4 bytes larger than configured due to the STACK
- * configuration paramter which is set to <?= $osstack; ?> */
-
-/** \brief Dummy Array to try to avoid a fatal error if a stack
- **        overflow occurrs. The array will be set to 10% of the size
- **        of all stacks */
-uint8 StackTaskDummyBefore[<?= $size_of_stack_dummy;?>];
-<?php
-}
+$tasks = $this->config->getList("/OSEK","TASK");
 
 foreach ($tasks as $task)
 {
-   $stack_size = $this->config->getValue("/OSEK/" . $task, "STACK");
-   if ( ($osstack == "OVERFLOW") || ($osstack == "OVERFLOW_SIZE")) {
-      $stack_size += 4;
-   }
    print "/** \brief $task stack */\n";
-   print "#if ( x86 == ARCH || linux == ARCH )\n";
-   print "uint8 StackTask" . $task . "[" . $stack_size ." + TASK_STACK_ADDITIONAL_SIZE];\n";
+   print "#if ( x86 == ARCH )\n";
+   print "uint8 StackTask" . $task . "[" . $this->config->getValue("/OSEK/" . $task, "STACK") ." + TASK_STACK_ADDITIONAL_SIZE];\n";
    print "#else\n";
-   print "uint8 StackTask" . $task . "[" . $stack_size ."];\n";
+   print "uint8 StackTask" . $task . "[" . $this->config->getValue("/OSEK/" . $task, "STACK") ."];\n";
    print "#endif\n";
-}
-if ( ($osstack == "OVERFLOW") || ($osstack == "OVERFLOW_SIZE")) {
-?>
-/** \brief Dummy Array to try to avoid a fatal error if a stack
- **        overflow occurrs. The array will be set to 10% of the size
- **        of all stacks */
-uint8 StackTaskDummyAfter[<?= $size_of_stack_dummy; ?>];
-<?php
 }
 print "\n";
 
@@ -143,9 +99,8 @@ foreach ($priority as $prio)
    print "TaskType ReadyList" . $prio . "[" . $count . "];\n\n";
 }
 
-$counters = $this->helper->multicore->getLocalList("/OSEK", "COUNTER");
-$alarms = $this->helper->multicore->getLocalList("/OSEK", "ALARM");
-
+$counters = $this->config->getList("/OSEK","COUNTER");
+$alarms = $this->config->getList("/OSEK","ALARM");
 foreach ($counters as $counter)
 {
    $countalarms = 0;
@@ -173,7 +128,7 @@ foreach ($counters as $counter)
 /* FreeOSEK to configured priority table
  *
  * This table show the relationship between the user selected
- * priorities and the FreeOSEK priorities:
+ * priorities and the OpenOSE priorities:
  *
  * User P.         Osek P.
 <?php
@@ -243,32 +198,10 @@ foreach ($tasks as $count=>$task)
    {
       $rlist .= "| ( 1 << $resource ) ";
    }
-   print "      $rlist,/* resources mask */\n";
-   if (isset($this->definitions["MCORE"]))
-   {
-      print "      " . $this->config->getValue("/OSEK/" . $task, "CORE") . " /* core */\n";
-   }
-   else
-   {
-      print "      0 /* core */\n";
-   }
+   print "      $rlist/* resources mask */\n";
    print "   }";
 }
 print "\n";
-?>
-};
-
-/** \brief RemoteTaskCore Array */
-const TaskCoreType RemoteTasksCore[REMOTE_TASKS_COUNT] = {<?php
-$rtasks = $this->helper->multicore->getRemoteList("/OSEK", "TASK");
-for($i=0; $i<count($rtasks); $i++)
-{
-   print $this->config->getValue("/OSEK/$rtasks[$i]", "CORE");
-   if ($i < (count($rtasks)-1))
-   {
-      print ", ";
-   }
-}
 ?>
 };
 
@@ -394,7 +327,8 @@ foreach ($resources as $resource)
 }
 print "\n};\n";
 
-$alarms = $this->helper->multicore->getLocalList("/OSEK", "ALARM");
+$alarms = $this->config->getList("/OSEK","ALARM");
+
 print "/** TODO replace next line with: \n";
 print " ** AlarmVarType AlarmsVar[" . count($alarms) . "]; */\n";
 print "AlarmVarType AlarmsVar[" . count($alarms) . "];\n\n";
@@ -449,16 +383,14 @@ foreach ($alarms as $count=>$alarm)
 print "\n};\n\n";
 
 print "const AutoStartAlarmType AutoStartAlarm[ALARM_AUTOSTART_COUNT] = {\n";
-$first = true;
+
 foreach ($alarms as $count=>$alarm)
 {
    if ($this->config->getValue("/OSEK/" . $alarm, "AUTOSTART") == "TRUE")
    {
-      if ($first == false)
+      if ($count != 0)
       {
          print ",\n";
-      } else {
-         $first = false;
       }
       print "  {\n";
 
@@ -472,8 +404,7 @@ foreach ($alarms as $count=>$alarm)
 }
 print "\n};\n\n";
 
-$counters = $this->helper->multicore->getLocalList("/OSEK", "COUNTER");
-
+$counters = $this->config->getList("/OSEK","COUNTER");
 print "CounterVarType CountersVar[" . count($counters) . "];\n\n";
 
 $alarms = $this->config->getList("/OSEK","ALARM");
@@ -511,17 +442,13 @@ uint8 ApplicationMode;
 
 /** TODO replace the next line with
  ** uint8 ErrorHookRunning; */
-/* This variable needs to be initialized to 0. This is the normal
- * behaviour in C, but in embedded C sometimes to save startup time
- * variables which do not have initialization are not initialized.
- */
-uint8 ErrorHookRunning = 0;
+uint8 ErrorHookRunning;
 
 /*==================[internal functions definition]==========================*/
 
 /*==================[external functions definition]==========================*/
 <?php
-$intnames = $this->helper->multicore->getLocalList("/OSEK", "ISR");
+$intnames = $this->config->getList("/OSEK","ISR");
 foreach ($intnames as $int)
 {
    $inttype = $this->config->getValue("/OSEK/" . $int,"INTERRUPT");
@@ -547,6 +474,9 @@ void OSEK_ISR2_<?php print $int;?>(void)
    if ( ( CONTEXT_TASK == actualContext ) &&
         ( TasksConst[GetRunningTask()].ConstFlags.Preemtive ) )
    {
+      /* indicate that the scheduler will be called from isr2 */
+      OSEK_ISR2_SchedulerCall = 1;
+
       /* this shall force a call to the scheduler */
       PostIsr2_Arch(isr);
    }

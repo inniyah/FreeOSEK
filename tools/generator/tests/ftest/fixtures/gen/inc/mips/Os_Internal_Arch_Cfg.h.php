@@ -2,10 +2,8 @@
  * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
  ********************************************************/
 
-/* Copyright 2008, 2009 Mariano Cerdeiro
- * Copyright 2014, ACSE & CADIEEL
- *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
- *      CADIEEL: http://www.cadieel.org.ar
+/* Copyright 2014 Mariano Cerdeiro
+ * All rights reserved.
  *
  * This file is part of CIAA Firmware.
  *
@@ -37,56 +35,44 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
+#ifndef _OS_INTERNAL_ARCH_CFG_H_
+#define _OS_INTERNAL_ARCH_CFG_H_
+
+/** \brief FreeOSEK Os Generated Internal Architecture Configuration Header File
  **
- ** \file Os_Cfg.c
+ ** This file content the internal generated architecture dependent
+ ** configuration of FreeOSEK.
+ **
+ ** \file mips/Os_Internal_Arch_Cfg.h
+ ** \arch mips
  **/
 
 /** \addtogroup FreeOSEK
  ** @{ */
 /** \addtogroup FreeOSEK_Os
  ** @{ */
-/** \addtogroup FreeOSEK_Os_Global
+/** \addtogroup FreeOSEK_Os_Internal
  ** @{ */
 
 /*==================[inclusions]=============================================*/
-#include "Os_Internal.h"
 
-/*==================[macros and definitions]=================================*/
+/*==================[macros]=================================================*/
 
-/*==================[internal data declaration]==============================*/
+/*==================[typedef]================================================*/
+/** \brief Task Context Type */
+typedef struct {
+} TaskContextType;
 
-/*==================[internal functions declaration]=========================*/
+/** \brief Task Context Type */
+typedef TaskContextType* TaskContextRefType;
 
-/*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
-{
-?>
-unsigned int Osek_ErrorApi;
+/*==================[external data declaration]==============================*/
 
-uintptr_t Osek_ErrorParam1;
-
-uintptr_t Osek_ErrorParam2;
-
-uintptr_t Osek_ErrorParam3;
-
-unsigned int Osek_ErrorRet;
-
-<?php
-}
-?>
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-/*==================[external functions definition]==========================*/
+/*==================[external functions declaration]=========================*/
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
+#endif /* #ifndef _OS_INTERNAL_ARCH_CFG_H_ */
 

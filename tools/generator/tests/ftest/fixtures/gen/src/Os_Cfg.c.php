@@ -60,18 +60,20 @@
 
 /*==================[internal data definition]===============================*/
 <?php
+
 $os = $this->config->getList("/OSEK","OS");
+
 $errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
 if ($errorhook == "TRUE")
 {
 ?>
 unsigned int Osek_ErrorApi;
 
-uintptr_t Osek_ErrorParam1;
+unsigned int Osek_ErrorParam1;
 
-uintptr_t Osek_ErrorParam2;
+unsigned int Osek_ErrorParam2;
 
-uintptr_t Osek_ErrorParam3;
+unsigned int Osek_ErrorParam3;
 
 unsigned int Osek_ErrorRet;
 

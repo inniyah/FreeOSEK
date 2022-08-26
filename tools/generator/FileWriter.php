@@ -1,11 +1,6 @@
-/********************************************************
- * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
- ********************************************************/
-
-/* Copyright 2008, 2009 Mariano Cerdeiro
- * Copyright 2014, ACSE & CADIEEL
- *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
- *      CADIEEL: http://www.cadieel.org.ar
+<?php
+ /* Copyright 2015, Carlos Pantelides
+ * All rights reserved.
  *
  * This file is part of CIAA Firmware.
  *
@@ -37,56 +32,73 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
+/** \brief FreeOSEK Generator
  **
- ** \file Os_Cfg.c
+ ** This file implements a File Writer utility
+ **
+ ** \file FileWriter.php
+ **
  **/
 
 /** \addtogroup FreeOSEK
  ** @{ */
-/** \addtogroup FreeOSEK_Os
+/** \addtogroup Generator
  ** @{ */
-/** \addtogroup FreeOSEK_Os_Global
- ** @{ */
+require_once("OutputWriter.php");
 
-/*==================[inclusions]=============================================*/
-#include "Os_Internal.h"
-
-/*==================[macros and definitions]=================================*/
-
-/*==================[internal data declaration]==============================*/
-
-/*==================[internal functions declaration]=========================*/
-
-/*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
+class FileWriter extends OutputWriter
 {
-?>
-unsigned int Osek_ErrorApi;
 
-uintptr_t Osek_ErrorParam1;
+   private $ob_file;
 
-uintptr_t Osek_ErrorParam2;
+   public function printMsg($msg)
+   {
+      print $msg;
+   }
 
-uintptr_t Osek_ErrorParam3;
+   public function outputFileName($file,$baseOutDir,$directorySeparator)
+   {
+      $outfile = substr($file, 0, strlen($file)-4);
+      $outfile = substr($outfile, strpos($outfile, $directorySeparator)+strlen($directorySeparator) -1);
+      $outfile = $baseOutDir . $outfile;
+      return $outfile;
+   }
 
-unsigned int Osek_ErrorRet;
+   public function open($file,$baseOutDir,$directorySeparator)
+   {
+      $outfile = $this->outputFileName($file,$baseOutDir,$directorySeparator);
 
-<?php
+      $this->log->info("buffering ". $file . " to " . $outfile);
+
+      if(!file_exists(dirname($outfile)))
+      {
+         mkdir(dirname($outfile), 0777, TRUE);
+      }
+      if(file_exists($outfile))
+      {
+         $exists = true;
+         if(file_exists($outfile . ".old"))
+         {
+            unlink($outfile . ".old");
+         }
+         rename($outfile, $outfile . ".old");
+      }
+      $this->ob_file = fopen($outfile, "w");
+      return $outfile;
+   }
+
+   public function close()
+   {
+      $this->buffering=false;
+      $this->flush();
+      fclose($this->ob_file);
+   }
+
+   public function ob_file_callback($buffer)
+   {
+      fwrite($this->ob_file,$buffer);
+   }
 }
-?>
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-/*==================[external functions definition]==========================*/
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
-/** @} doxygen end group definition */
-/*==================[end of file]============================================*/
-

@@ -1,11 +1,6 @@
-/********************************************************
- * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
- ********************************************************/
-
-/* Copyright 2008, 2009 Mariano Cerdeiro
- * Copyright 2014, ACSE & CADIEEL
- *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
- *      CADIEEL: http://www.cadieel.org.ar
+<?php
+/* Copyright 2015, 2016, Carlos Pantelides
+ * All rights reserved.
  *
  * This file is part of CIAA Firmware.
  *
@@ -37,56 +32,45 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
+/** \brief FreeOSEK Generator
  **
- ** \file Os_Cfg.c
+ ** This file implements a Stdout Writer utility
+ **
+ ** \file StdoutWriter.php
+ **
  **/
 
 /** \addtogroup FreeOSEK
  ** @{ */
-/** \addtogroup FreeOSEK_Os
- ** @{ */
-/** \addtogroup FreeOSEK_Os_Global
+/** \addtogroup Generator
  ** @{ */
 
-/*==================[inclusions]=============================================*/
-#include "Os_Internal.h"
+require_once("OutputWriter.php");
 
-/*==================[macros and definitions]=================================*/
-
-/*==================[internal data declaration]==============================*/
-
-/*==================[internal functions declaration]=========================*/
-
-/*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
+class StdoutWriter extends OutputWriter
 {
-?>
-unsigned int Osek_ErrorApi;
 
-uintptr_t Osek_ErrorParam1;
+   public function open($file,$baseOutDir,$pathDelimiter)
+   {
+      $this->log->info("generating ". $file . " to STDOUT");
+      return "STDOUT";
+   }
 
-uintptr_t Osek_ErrorParam2;
+   public function close()
+   {
+      $this->buffering=false;
+      $this->flush();
+   }
+   public function ob_file_callback($buffer)
+   {
+      print $buffer;
+   }
 
-uintptr_t Osek_ErrorParam3;
-
-unsigned int Osek_ErrorRet;
-
-<?php
+   public function printMsg($msg)
+   {
+      print $msg;
+   }
 }
-?>
-
-/*==================[external data definition]===============================*/
-
-/*==================[internal functions definition]==========================*/
-
-/*==================[external functions definition]==========================*/
-
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
-/** @} doxygen end group definition */
-/*==================[end of file]============================================*/
 

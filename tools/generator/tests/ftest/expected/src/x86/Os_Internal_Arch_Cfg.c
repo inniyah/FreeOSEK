@@ -1,4 +1,4 @@
-/********************************************************
+ /********************************************************
  * DO NOT CHANGE THIS FILE, IT IS GENERATED AUTOMATICALY*
  ********************************************************/
 
@@ -37,16 +37,16 @@
  *
  */
 
-/** \brief FreeOSEK Os Generated Configuration Implementation File
+/** \brief FreeOSEK Os Generated Internal Achitecture Configuration Implementation File
  **
- ** \file Os_Cfg.c
+ ** \file Os_Internal_Arch_Cfg.c
  **/
 
 /** \addtogroup FreeOSEK
  ** @{ */
 /** \addtogroup FreeOSEK_Os
  ** @{ */
-/** \addtogroup FreeOSEK_Os_Global
+/** \addtogroup FreeOSEK_Os_Internal
  ** @{ */
 
 /*==================[inclusions]=============================================*/
@@ -59,27 +59,49 @@
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
-<?php
-$os = $this->config->getList("/OSEK","OS");
-$errorhook=$this->config->getValue("/OSEK/" . $os[0],"ERRORHOOK");
-if ($errorhook == "TRUE")
-{
-?>
-unsigned int Osek_ErrorApi;
-
-uintptr_t Osek_ErrorParam1;
-
-uintptr_t Osek_ErrorParam2;
-
-uintptr_t Osek_ErrorParam3;
-
-unsigned int Osek_ErrorRet;
-
-<?php
-}
-?>
 
 /*==================[external data definition]===============================*/
+/** \brief InitTask context */
+TaskContextType TaskContextInitTask;
+/** \brief PeriodicTask context */
+TaskContextType TaskContextPeriodicTask;
+
+
+InterruptType InterruptTable[INTERRUPTS_COUNT] =
+{
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 0 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 1 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 2 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 3 */
+   OSEK_ISR_HWTimer0, /* HW Timer 0 Interrupt handler */
+   OSEK_ISR_HWTimer1, /* HW Timer 1 Interrupt handler */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 6 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 7 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 8 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 9 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 10 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 11 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 12 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 13 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 14 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 15 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 16 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 17 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 18 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 19 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 20 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 21 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 22 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 23 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 24 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 25 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 26 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 27 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 28 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 29 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 30 */
+   OSEK_ISR_NoHandler, /* no interrupt handler for interrupt 31 */
+};
 
 /*==================[internal functions definition]==========================*/
 
