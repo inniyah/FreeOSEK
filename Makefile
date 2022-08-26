@@ -1,4 +1,4 @@
-#!/usr/bin/make -f
+#!/usr/bin/env -S make -f
 
 APP_NAME=app
 
@@ -6,8 +6,8 @@ ARCH= linux
 CPUTYPE= posix
 CPU= none
 
-ARCH_DIR?= $(ARCH)
-CPUTYPE_DIR?= $(CPUTYPE)
+ARCH_SUBDIR?= $(ARCH)
+CPUTYPE_SUBDIR?= $(CPUTYPE)
 
 DEF_ARCH?= ARCH_$(shell echo '$(ARCH)' | tr '[:lower:]' '[:upper:]')
 DEF_CPUTYPE?= CPUTYPE_$(shell echo '$(CPUTYPE)' | tr '[:lower:]' '[:upper:]')
@@ -36,7 +36,7 @@ CFG_DIR:=$(CURDIR)/$(ARCH_NAME)/config
 
 SRC_DIR:=$(CURDIR)/app/src
 OIL_DIR:=$(CURDIR)/app/oil
-OSEK_DIR:=$(CURDIR)/common/osek
+ARCH_DIR:=$(CURDIR)/arch
 TOOLS_DIR:=$(CURDIR)/tools
 
 LD   = $(TRGT)gcc
@@ -128,10 +128,10 @@ DEFS= \
 	-DDEBUG
 
 INCS= \
-	-I "$(CFG_DIR)/inc/$(ARCH_DIR)/" \
+	-I "$(CFG_DIR)/inc/$(ARCH_SUBDIR)/" \
 	-I "$(CFG_DIR)/inc/" \
-	-I "$(CURDIR)/inc/$(ARCH_DIR)/$(CPUTYPE_DIR)/" \
-	-I "$(CURDIR)/inc/$(ARCH_DIR)/" \
+	-I "$(ARCH_DIR)/inc/$(ARCH_SUBDIR)/$(CPUTYPE_SUBDIR)/" \
+	-I "$(ARCH_DIR)/inc/$(ARCH_SUBDIR)/" \
 	-I "$(CURDIR)/inc/" \
 	-I "$(CURDIR)/app/inc/" \
 	-I "$(SRC_DIR)/"
@@ -139,11 +139,11 @@ INCS= \
 OBJS= \
 	$(OBJ_DIR)/app/Os_Cfg.o \
 	$(OBJ_DIR)/app/Os_Internal_Cfg.o \
-	$(OBJ_DIR)/app/$(ARCH_DIR)/Os_Internal_Arch_Cfg.o \
+	$(OBJ_DIR)/app/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.o \
 	$(OBJ_DIR)/app/main.o \
-	$(OBJ_DIR)/osek/$(ARCH_DIR)/Os_Arch.o \
-	$(OBJ_DIR)/osek/$(ARCH_DIR)/Os_Internal_Arch.o \
-	$(OBJ_DIR)/osek/$(ARCH_DIR)/StartOs_Arch.o \
+	$(OBJ_DIR)/arch/Os_Arch.o \
+	$(OBJ_DIR)/arch/Os_Internal_Arch.o \
+	$(OBJ_DIR)/arch/StartOs_Arch.o \
 	$(OBJ_DIR)/osek/ActivateTask.o \
 	$(OBJ_DIR)/osek/CancelAlarm.o \
 	$(OBJ_DIR)/osek/ChainTask.o \
@@ -220,6 +220,15 @@ $(OBJ_DIR)/osek/%.o: $(CURDIR)/src/%.cpp
 	$(CXX) $(CPPSTD) $(MCU_FLAGS) $(OPTS) $(CXX_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CPPWARN)
 
 
+$(OBJ_DIR)/arch/%.o: $(ARCH_DIR)/src/$(ARCH_SUBDIR)/%.c
+	@mkdir -p "$$(dirname '$@')"
+	$(CC) $(CSTD) $(MCU_FLAGS) $(OPTS) $(C_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+$(OBJ_DIR)/arch/%.o: $(ARCH_DIR)/src/$(ARCH_SUBDIR)/%.s
+	@mkdir -p "$$(dirname '$@')"
+	$(AS) $(CSTD) $(MCU_FLAGS) $(OPTS) $(ASM_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+
 $(OBJ_DIR)/%.o: %.s
 	@mkdir -p "$$(dirname '$@')"
 	$(AS) $(CSTD) $(MCU_FLAGS) $(OPTS) $(ASM_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
@@ -238,8 +247,8 @@ $(CFG_DIR)/inc/Os_Cfg.h \
 $(CFG_DIR)/src/Os_Cfg.c \
 $(CFG_DIR)/inc/Os_Internal_Cfg.h \
 $(CFG_DIR)/src/Os_Internal_Cfg.c \
-$(CFG_DIR)/inc/$(ARCH_DIR)/Os_Internal_Arch_Cfg.h \
-$(CFG_DIR)/src/$(ARCH_DIR)/Os_Internal_Arch_Cfg.c:
+$(CFG_DIR)/inc/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.h \
+$(CFG_DIR)/src/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.c:
 	mkdir -p '$(CFG_DIR)/inc'
 	mkdir -p '$(CFG_DIR)/src'
 	$(OIL_GENERATOR) \
@@ -248,13 +257,13 @@ $(CFG_DIR)/src/$(ARCH_DIR)/Os_Internal_Arch_Cfg.c:
 		-DCPUTYPE='$(CPUTYPE)' \
 		-DCPU='$(CPU)' \
 		-c '$(OIL_DIR)/config.oil' \
-		-t '$(CURDIR)/gen/inc/Os_Internal_Cfg.h.php' \
-		'$(CURDIR)/gen/inc/Os_Cfg.h.php' \
-		'$(CURDIR)/gen/src/Os_Cfg.c.php' \
-		'$(CURDIR)/gen/src/Os_Internal_Cfg.c.php' \
-		'$(CURDIR)/gen/src/$(ARCH_DIR)/Os_Internal_Arch_Cfg.c.php' \
-		'$(CURDIR)/gen/inc/$(ARCH_DIR)/Os_Internal_Arch_Cfg.h.php' \
-		-H '$(CURDIR)/gen/ginc/Multicore.php' \
+		-t '$(ARCH_DIR)/gen/inc/Os_Internal_Cfg.h.php' \
+		'$(ARCH_DIR)/gen/inc/Os_Cfg.h.php' \
+		'$(ARCH_DIR)/gen/src/Os_Cfg.c.php' \
+		'$(ARCH_DIR)/gen/src/Os_Internal_Cfg.c.php' \
+		'$(ARCH_DIR)/gen/src/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.c.php' \
+		'$(ARCH_DIR)/gen/inc/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.h.php' \
+		-H '$(ARCH_DIR)/gen/ginc/Multicore.php' \
 		-o '$(CFG_DIR)'
 
 
