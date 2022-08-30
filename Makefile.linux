@@ -1,6 +1,7 @@
 #!/usr/bin/env -S make -f
 
-APP_NAME=app
+APP_NAME=app.linux
+APP_SUBDIR=app.linux
 
 ARCH= linux
 CPUTYPE= posix
@@ -34,8 +35,8 @@ OUT_DIR:=$(CURDIR)/$(ARCH_NAME)/out
 OBJ_DIR:=$(CURDIR)/$(ARCH_NAME)/obj
 CFG_DIR:=$(CURDIR)/$(ARCH_NAME)/config
 
-SRC_DIR:=$(CURDIR)/app/src
-OIL_DIR:=$(CURDIR)/app/oil
+SRC_DIR:=$(CURDIR)/$(APP_SUBDIR)/src
+OIL_DIR:=$(CURDIR)/$(APP_SUBDIR)/oil
 ARCH_DIR:=$(CURDIR)/arch
 TOOLS_DIR:=$(CURDIR)/tools
 
@@ -133,14 +134,14 @@ INCS= \
 	-I "$(ARCH_DIR)/inc/$(ARCH_SUBDIR)/$(CPUTYPE_SUBDIR)/" \
 	-I "$(ARCH_DIR)/inc/$(ARCH_SUBDIR)/" \
 	-I "$(CURDIR)/inc/" \
-	-I "$(CURDIR)/app/inc/" \
+	-I "$(CURDIR)/$(APP_SUBDIR)/inc/" \
 	-I "$(SRC_DIR)/"
 
 OBJS= \
-	$(OBJ_DIR)/app/Os_Cfg.o \
-	$(OBJ_DIR)/app/Os_Internal_Cfg.o \
-	$(OBJ_DIR)/app/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.o \
-	$(OBJ_DIR)/app/main.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/Os_Cfg.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/Os_Internal_Cfg.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/main.o \
 	$(OBJ_DIR)/arch/Os_Arch.o \
 	$(OBJ_DIR)/arch/Os_Internal_Arch.o \
 	$(OBJ_DIR)/arch/StartOs_Arch.o \
@@ -189,20 +190,20 @@ $(OUT_DIR)/$(APP_NAME).elf: $(OBJS) $(LD_OBJS)
 	$(OD) -x --syms $< > $@
 
 
-$(OBJ_DIR)/app/%.o: $(CFG_DIR)/src/%.c
+$(OBJ_DIR)/$(APP_SUBDIR)/%.o: $(CFG_DIR)/src/%.c
 	@mkdir -p "$$(dirname '$@')"
 	$(CC) $(CSTD) $(MCU_FLAGS) $(OPTS) $(C_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
 
 
-$(OBJ_DIR)/app/%.o: $(SRC_DIR)/%.s
+$(OBJ_DIR)/$(APP_SUBDIR)/%.o: $(SRC_DIR)/%.s
 	@mkdir -p "$$(dirname '$@')"
 	$(AS) $(CSTD) $(MCU_FLAGS) $(OPTS) $(ASM_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
 
-$(OBJ_DIR)/app/%.o: $(SRC_DIR)/%.c
+$(OBJ_DIR)/$(APP_SUBDIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p "$$(dirname '$@')"
 	$(CC) $(CSTD) $(MCU_FLAGS) $(OPTS) $(C_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
 
-$(OBJ_DIR)/app/%.o: $(SRC_DIR)/%.cpp
+$(OBJ_DIR)/$(APP_SUBDIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p "$$(dirname '$@')"
 	$(CXX) $(CPPSTD) $(MCU_FLAGS) $(OPTS) $(CXX_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CPPWARN)
 
@@ -271,6 +272,9 @@ disasm: all
 	cp $(OUT_DIR)/$(APP_NAME).elf $(OUT_DIR)/$(APP_NAME).strip.elf
 	$(OD) -D $(OUT_DIR)/$(APP_NAME).strip.elf
 
+
+run: $(OUT_DIR)/$(APP_NAME).elf
+	$<
 
 clean:
 	$(RM) $(OBJS)
