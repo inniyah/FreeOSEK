@@ -224,6 +224,7 @@ OBJS= \
 	$(OBJ_DIR)/$(APP_SUBDIR)/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/vectors.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/sysfunc.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/startup.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/main.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/stackchk.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/printf.o \

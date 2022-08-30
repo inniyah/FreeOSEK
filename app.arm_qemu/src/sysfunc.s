@@ -1,11 +1,11 @@
 .cpu cortex-m0
 .thumb
 
-.thumb_func
-.globl ResetISR
-ResetISR:
-    bl main
-    b hang
+#~ .thumb_func
+#~ .globl ResetISR
+#~ ResetISR:
+#~     bl main
+#~     b hang
 
 .thumb_func
 .globl hang
