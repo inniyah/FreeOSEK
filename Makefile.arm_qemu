@@ -1,0 +1,393 @@
+#!/usr/bin/env -S make -f
+
+APP_NAME=app.arm_qemu
+APP_SUBDIR=app.arm_qemu
+
+## ARCH, CPUTYPE and CPU following are supported
+## +--------------+---------------+----------------+--------------+---------------+
+## |      ARCH    |    CPUTYPE    |      CPU       | COMPILER     | BOARD         |
+## +--------------+---------------+----------------+--------------+---------------+
+## | x86          | ia32          |                | gcc          | ciaa_sim_ia32 |
+## |              | ia64          |                |              | ciaa_sim_ia64 |
+## +--------------+---------------+----------------+--------------+---------------+
+## | cortexM4     | lpc43xx       | lpc4337        | gcc          | edu_ciaa_nxp  |
+## |              |               |                |              | ciaa_nxp      |
+## |              | lpc5410x      | lpc54102       | gcc          | pico_ciaa     |
+## |              | k60_120       | mk60fx512vlq15 | gcc          | ciaa_fsl      |
+## +--------------+---------------+----------------+--------------+---------------+
+## | mips         | pic32         | pic32mz        | gcc          | ciaa_pic      |
+## +--------------+---------------+----------------+--------------+---------------+
+## | sparcV8      | leon3         | leon3nfp       | gcc          | leon3_fpga_nfp|
+## +--------------+---------------+----------------+--------------+---------------+
+
+ARCH= cortexM0
+CPUTYPE= thumb
+CPU= thumb
+
+ARCH_SUBDIR?= $(ARCH)
+CPUTYPE_SUBDIR?= $(CPUTYPE)
+
+DEF_ARCH?= ARCH_$(shell echo '$(ARCH)' | tr '[:lower:]' '[:upper:]')
+DEF_CPUTYPE?= CPUTYPE_$(shell echo '$(CPUTYPE)' | tr '[:lower:]' '[:upper:]')
+DEF_CPU?= CPU_$(shell echo '$(CPU)' | tr '[:lower:]' '[:upper:]')
+
+NUMCPUS=$(shell grep -c '^processor' /proc/cpuinfo)
+
+## Architecture options usage
+## --------------------------------------------------------------------
+## | ARM Core | Command Line Options                       | multilib |
+## |----------|--------------------------------------------|----------|
+## |Cortex-M0+| -mthumb -mcpu=cortex-m0plus                | armv6-m  |
+## |Cortex-M0 | -mthumb -mcpu=cortex-m0                    |          |
+## |Cortex-M1 | -mthumb -mcpu=cortex-m1                    |          |
+## |          |--------------------------------------------|          |
+## |          | -mthumb -march=armv6-m                     |          |
+## |----------|--------------------------------------------|----------|
+## |Cortex-M3 | -mthumb -mcpu=cortex-m3                    | armv7-m  |
+## |          |--------------------------------------------|          |
+## |          | -mthumb -march=armv7-m                     |          |
+## |----------|--------------------------------------------|----------|
+## |Cortex-M4 | -mthumb -mcpu=cortex-m4                    | armv7e-m |
+## |(No FP)   |--------------------------------------------|          |
+## |          | -mthumb -march=armv7e-m                    |          |
+## |----------|--------------------------------------------|----------|
+## |Cortex-M4 | -mthumb -mcpu=cortex-m4 -mfloat-abi=softfp | armv7e-m |
+## |(Soft FP) | -mfpu=fpv4-sp-d16                          | /softfp  |
+## |          |--------------------------------------------|          |
+## |          | -mthumb -march=armv7e-m -mfloat-abi=softfp |          |
+## |          | -mfpu=fpv4-sp-d16                          |          |
+## |----------|--------------------------------------------|----------|
+## |Cortex-M4 | -mthumb -mcpu=cortex-m4 -mfloat-abi=hard   | armv7e-m |
+## |(Hard FP) | -mfpu=fpv4-sp-d16                          | /fpu     |
+## |          |--------------------------------------------|          |
+## |          | -mthumb -march=armv7e-m -mfloat-abi=hard   |          |
+## |          | -mfpu=fpv4-sp-d16                          |          |
+## |----------|--------------------------------------------|----------|
+## |Cortex-R4 | [-mthumb] -march=armv7-r                   | armv7-ar |
+## |Cortex-R5 |                                            | /thumb   |
+## |Cortex-R7 |                                            |      |
+## |(No FP)   |                                            |          |
+## |----------|--------------------------------------------|----------|
+## |Cortex-R4 | [-mthumb] -march=armv7-r -mfloat-abi=softfp| armv7-ar |
+## |Cortex-R5 | -mfpu=vfpv3-d16                            | /thumb   |
+## |Cortex-R7 |                                            | /softfp  |
+## |(Soft FP) |                                            |          |
+## |----------|--------------------------------------------|----------|
+## |Cortex-R4 | [-mthumb] -march=armv7-r -mfloat-abi=hard  | armv7-ar |
+## |Cortex-R5 | -mfpu=vfpv3-d16                            | /thumb   |
+## |Cortex-R7 |                                            | /fpu     |
+## |(Hard FP) |                                            |          |
+## |----------|--------------------------------------------|----------|
+## |Cortex-A* | [-mthumb] -march=armv7-a                   | armv7-ar |
+## |(No FP)   |                                            | /thumb   |
+## |----------|--------------------------------------------|----------|
+## |Cortex-A* | [-mthumb] -march=armv7-a -mfloat-abi=softfp| armv7-ar |
+## |(Soft FP) | -mfpu=vfpv3-d16                            | /thumb   |
+## |          |                                            | /softfp  |
+## |----------|--------------------------------------------|----------|
+## |Cortex-A* | [-mthumb] -march=armv7-a -mfloat-abi=hard  | armv7-ar |
+## |(Hard FP) | -mfpu=vfpv3-d16                            | /thumb   |
+## |          |                                            | /fpu     |
+## --------------------------------------------------------------------
+
+MCU_FLAGS = -mthumb -mcpu=cortex-m3 -march=armv7-m
+
+TRGT = arm-none-eabi-
+CC   = $(TRGT)gcc
+CXX  = $(TRGT)g++
+
+ARCH_NAME:=$(shell '$(TRGT)gcc' -dumpmachine)
+
+ifeq ($(strip $(ARCH_NAME)),)
+ARCH_NAME:=unknown
+endif
+
+CURDIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+BASEDIR:=$(CURDIR)/../..
+
+OUT_DIR:=$(CURDIR)/$(ARCH_NAME)/out
+OBJ_DIR:=$(CURDIR)/$(ARCH_NAME)/obj
+CFG_DIR:=$(CURDIR)/$(ARCH_NAME)/config
+
+SRC_DIR:=$(CURDIR)/$(APP_SUBDIR)/src
+OIL_DIR:=$(CURDIR)/$(APP_SUBDIR)/oil
+ARCH_DIR:=$(CURDIR)/arch
+TOOLS_DIR:=$(CURDIR)/tools
+
+LD   = $(TRGT)gcc
+
+CP   = $(TRGT)objcopy
+AS   = $(TRGT)gcc -x assembler-with-cpp
+OD   = $(TRGT)objdump
+SZ   = $(TRGT)size
+HEX  = $(CP) -O ihex
+MOT  = $(CP) -O srec
+BIN  = $(CP) -O binary
+
+RM   = rm --force --verbose
+
+PHP = php
+
+PYTHON = python3
+
+OIL_GENERATOR:=$(PHP) $(TOOLS_DIR)/generator/generator.php
+
+# Define C warning options here
+CWARN = -Wall -Wextra -Wstrict-prototypes -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-value
+
+# Define C++ warning options here.
+CPPWARN = -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-value
+
+# Compiler options here.
+OPTS = \
+	-O2 \
+	-gdwarf-2 \
+	-nostdlib \
+	-nostartfiles \
+	-ffreestanding \
+	-fomit-frame-pointer \
+	-falign-functions=16 \
+	-mfpu=auto \
+	-mfloat-abi=softfp \
+	-msoft-float \
+	-fstack-protector-all \
+	-fdiagnostics-color=always
+
+# ASM specific options here.
+ASM_OPTS = \
+	-Wall \
+	-Werror
+
+# C specific options here.
+C_OPTS = 
+
+# C++ specific options here.
+CXX_OPTS = 
+
+# Enable this if you want the linker to remove unused code and data.
+USE_LINK_GC = yes
+
+# Linker options here.
+LD_OPTS = \
+	-Wl,-O1 \
+	-ffunction-sections \
+	-fdata-sections \
+	-fno-common \
+	-Wl,-z,now \
+	-Wl,--as-needed \
+	-Wl,--no-undefined \
+	-Wl,--no-allow-shlib-undefined \
+	-Wl,-Bsymbolic-functions \
+	-Wl,--dynamic-list-cpp-new \
+	-Wl,--dynamic-list-cpp-typeinfo \
+	-no-pie
+
+CFLAGS= \
+	-fwrapv \
+	-fstack-protector-strong \
+	-fdata-sections \
+	-ffunction-sections \
+	-fno-strict-aliasing \
+	-Wformat \
+	-Werror=format-security \
+	-Wdate-time \
+	-D_FORTIFY_SOURCE=2 \
+	-no-pie
+
+LDFLAGS= \
+	-T "$(CURDIR)/$(APP_SUBDIR)/linker/firmware.ld" \
+	-Wl,-Map="$(OUT_DIR)/$(APP_NAME).map"
+
+LIBS= 
+
+CSTD=-std=gnu99
+CPPSTD=-std=gnu++98
+
+DEFS= \
+	-DARCH=$(DEF_ARCH) \
+	-DCPUTYPE=$(DEF_CPUTYPE) \
+	-DCPU=$(DEF_CPU) \
+	-DDEBUG
+
+INCS= \
+	-I "$(CFG_DIR)/inc/$(ARCH_SUBDIR)/" \
+	-I "$(CFG_DIR)/inc/" \
+	-I "$(ARCH_DIR)/inc/$(ARCH_SUBDIR)/$(CPUTYPE_SUBDIR)/" \
+	-I "$(ARCH_DIR)/inc/$(ARCH_SUBDIR)/" \
+	-I "$(CURDIR)/inc/" \
+	-I "$(CURDIR)/$(APP_SUBDIR)/inc/" \
+	-I "$(SRC_DIR)/"
+
+OBJS= \
+	$(OBJ_DIR)/$(APP_SUBDIR)/Os_Cfg.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/Os_Internal_Cfg.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/vectors.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/sysfunc.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/main.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/stackchk.o \
+	$(OBJ_DIR)/$(APP_SUBDIR)/printf.o \
+	$(OBJ_DIR)/arch/Os_Arch.o \
+	$(OBJ_DIR)/arch/Os_Internal_Arch.o \
+	$(OBJ_DIR)/arch/StartOs_Arch.o \
+	$(OBJ_DIR)/arch/StartOs_Arch_SysTick.o \
+	$(OBJ_DIR)/osek/ActivateTask.o \
+	$(OBJ_DIR)/osek/CancelAlarm.o \
+	$(OBJ_DIR)/osek/ChainTask.o \
+	$(OBJ_DIR)/osek/ClearEvent.o \
+	$(OBJ_DIR)/osek/GetActiveApplicationMode.o \
+	$(OBJ_DIR)/osek/GetAlarmBase.o \
+	$(OBJ_DIR)/osek/GetAlarm.o \
+	$(OBJ_DIR)/osek/GetEvent.o \
+	$(OBJ_DIR)/osek/GetResource.o \
+	$(OBJ_DIR)/osek/GetTaskID.o \
+	$(OBJ_DIR)/osek/GetTaskState.o \
+	$(OBJ_DIR)/osek/Os.o \
+	$(OBJ_DIR)/osek/Os_Internal.o \
+	$(OBJ_DIR)/osek/ReleaseResource.o \
+	$(OBJ_DIR)/osek/Schedule.o \
+	$(OBJ_DIR)/osek/SetAbsAlarm.o \
+	$(OBJ_DIR)/osek/SetEvent.o \
+	$(OBJ_DIR)/osek/SetRelAlarm.o \
+	$(OBJ_DIR)/osek/ShutdownOS.o \
+	$(OBJ_DIR)/osek/StartOS.o \
+	$(OBJ_DIR)/osek/TerminateTask.o \
+	$(OBJ_DIR)/osek/WaitEvent.o
+
+
+all: $(CFG_DIR)/inc/Os_Cfg.h $(OUT_DIR)/$(APP_NAME).bin
+
+$(OUT_DIR)/$(APP_NAME).elf: $(OBJS) $(LD_OBJS)
+	@mkdir -p "$$(dirname '$@')"
+	$(LD) $(CPPSTD) $(CSTD) $(MCU_FLAGS) $(OPTS) $(LD_OPTS) $(LDFLAGS) -o $@ $+ $(LIBS)
+
+# See: https://makefiletutorial.com/
+
+%.hex: %.elf
+	$(CP) -O ihex $< $@
+
+%.mot: %.elf
+	$(CP) -O srec $< $@
+
+%.bin: %.elf
+	$(OD) -D $< > $*.list
+	$(CP) $< $@ -O binary
+
+%.dmp: %.elf
+	$(OD) -x --syms $< > $@
+
+
+$(OBJ_DIR)/$(APP_SUBDIR)/%.o: $(CFG_DIR)/src/%.c
+	@mkdir -p "$$(dirname '$@')"
+	$(CC) $(CSTD) $(MCU_FLAGS) $(OPTS) $(C_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+
+$(OBJ_DIR)/$(APP_SUBDIR)/%.o: $(SRC_DIR)/%.s
+	@mkdir -p "$$(dirname '$@')"
+	$(AS) $(CSTD) $(MCU_FLAGS) $(OPTS) $(ASM_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+$(OBJ_DIR)/$(APP_SUBDIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p "$$(dirname '$@')"
+	$(CC) $(CSTD) $(MCU_FLAGS) $(OPTS) $(C_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+$(OBJ_DIR)/$(APP_SUBDIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p "$$(dirname '$@')"
+	$(CXX) $(CPPSTD) $(MCU_FLAGS) $(OPTS) $(CXX_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CPPWARN)
+
+
+$(OBJ_DIR)/osek/%.o: $(CURDIR)/src/%.s
+	@mkdir -p "$$(dirname '$@')"
+	$(AS) $(CSTD) $(MCU_FLAGS) $(OPTS) $(ASM_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+$(OBJ_DIR)/osek/%.o: $(CURDIR)/src/%.c
+	@mkdir -p "$$(dirname '$@')"
+	$(CC) $(CSTD) $(MCU_FLAGS) $(OPTS) $(C_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+$(OBJ_DIR)/osek/%.o: $(CURDIR)/src/%.cpp
+	@mkdir -p "$$(dirname '$@')"
+	$(CXX) $(CPPSTD) $(MCU_FLAGS) $(OPTS) $(CXX_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CPPWARN)
+
+
+$(OBJ_DIR)/arch/%.o: $(ARCH_DIR)/src/$(ARCH_SUBDIR)/%.c
+	@mkdir -p "$$(dirname '$@')"
+	$(CC) $(CSTD) $(MCU_FLAGS) $(OPTS) $(C_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+$(OBJ_DIR)/arch/%.o: $(ARCH_DIR)/src/$(ARCH_SUBDIR)/%.s
+	@mkdir -p "$$(dirname '$@')"
+	$(AS) $(CSTD) $(MCU_FLAGS) $(OPTS) $(ASM_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+
+$(OBJ_DIR)/%.o: %.s
+	@mkdir -p "$$(dirname '$@')"
+	$(AS) $(CSTD) $(MCU_FLAGS) $(OPTS) $(ASM_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+$(OBJ_DIR)/%.o: %.c
+	@mkdir -p "$$(dirname '$@')"
+	$(CC) $(CSTD) $(MCU_FLAGS) $(OPTS) $(C_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CWARN)
+
+$(OBJ_DIR)/%.o: %.cpp
+	@mkdir -p "$$(dirname '$@')"
+	$(CXX) $(CPPSTD) $(MCU_FLAGS) $(OPTS) $(CXX_OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(CPPWARN)
+
+
+$(CFG_DIR) \
+$(CFG_DIR)/inc/Os_Cfg.h \
+$(CFG_DIR)/src/Os_Cfg.c \
+$(CFG_DIR)/inc/Os_Internal_Cfg.h \
+$(CFG_DIR)/src/Os_Internal_Cfg.c \
+$(CFG_DIR)/inc/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.h \
+$(CFG_DIR)/src/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.c:
+	mkdir -p '$(CFG_DIR)/inc'
+	mkdir -p '$(CFG_DIR)/src'
+	$(OIL_GENERATOR) \
+		--cmdline -l -v \
+		-DARCH='$(ARCH)' \
+		-DCPUTYPE='$(CPUTYPE)' \
+		-DCPU='$(CPU)' \
+		-c '$(OIL_DIR)/config.oil' \
+		-t '$(ARCH_DIR)/gen/inc/Os_Internal_Cfg.h.php' \
+		'$(ARCH_DIR)/gen/inc/Os_Cfg.h.php' \
+		'$(ARCH_DIR)/gen/src/Os_Cfg.c.php' \
+		'$(ARCH_DIR)/gen/src/Os_Internal_Cfg.c.php' \
+		'$(ARCH_DIR)/gen/src/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.c.php' \
+		'$(ARCH_DIR)/gen/inc/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.h.php' \
+		-H '$(ARCH_DIR)/gen/ginc/Multicore.php' \
+		-o '$(CFG_DIR)'
+
+
+disasm: all
+	cp $(OUT_DIR)/$(APP_NAME).elf $(OUT_DIR)/$(APP_NAME).strip.elf
+	$(OD) -D $(OUT_DIR)/$(APP_NAME).strip.elf
+
+
+run: $(OUT_DIR)/$(APP_NAME).bin
+	qemu-system-arm -M lm3s811evb -m 8K -nographic -kernel "$<"
+
+
+debug: $(OUT_DIR)/$(APP_NAME).bin
+	@echo gdb-multiarch --ex="set arch armv5te" --ex="set sysroot /usr/arm-linux-gnueabihf/" --ex="target remote localhost:1234" --ex="break main" $(<:.bin=.elf)
+	@echo ddd --debugger 'gdb-multiarch --ex="set arch armv5te" --ex="set sysroot /usr/arm-linux-gnueabihf/" --ex="target remote localhost:1234" --ex="break main" $(<:.bin=.elf)' --gdb
+	qemu-system-arm -M lm3s811evb -m 8K -nographic -s -S -kernel "$<"
+
+
+clean:
+	$(RM) $(OBJS)
+	$(RM) --recursive "$(CFG_DIR)/inc/"
+	$(RM) --recursive "$(CFG_DIR)/src/"
+	$(RM) --recursive  $(OUT_DIR)/ $(OBJ_DIR)/ $(CFG_DIR)/ $(CURDIR)/$(ARCH_NAME)/
+	@find . -name '*.o' -exec $(RM) {} +
+	@find . -name '*.a' -exec $(RM) {} +
+	@find . -name '*.so' -exec $(RM) {} +
+	@find . -name '*.map' -exec $(RM) {} +
+	@find . -name '*.elf' -exec $(RM) {} +
+	@find . -name '*.hex' -exec $(RM) {} +
+	@find . -name '*.bin' -exec $(RM) {} +
+	@find . -name '*.dmp' -exec $(RM) {} +
+	@find . -name '*.pyc' -exec $(RM) {} +
+	@find . -name '*.pyo' -exec $(RM) {} +
+	@find . -name '*.bak' -exec $(RM) {} +
+	@find . -name '*.core' -exec $(RM) {} +
+	@find . -name '*~' -exec $(RM) {} +
+	@$(RM) core
+
+.PHONY: all clean disasm

@@ -80,24 +80,29 @@ extern "C" {
 #error CPU is not defined, this define shall be included in the compile command
 #endif
 
-enum {
-    ARCH_LINUX = 0xA000000,
-    ARCH_POWERPC,
-    ARCH_CORTEXM0,
-};
+#define ARCH_LINUX      0xA000000
+#define ARCH_POWERPC    0xA000001
+#define ARCH_CORTEXM0   0xA000002
+#define ARCH_CORTEXM4   0xA000003
+#define ARCH_X86        0xA000004
+#define ARCH_MIPS       0xA000005
+#define ARCH_SPARCV8    0xA000006
 
-enum {
-    CPUTYPE_NONE = 0xB000000,
-    CPUTYPE_POSIX,
-    CPUTYPE_SPC5XX,
-    CPUTYPE_KEA64,
-};
+#define CPUTYPE_NONE    0xB000000
+#define CPUTYPE_LPC43XX 0xB000001
+#define CPUTYPE_POSIX   0xB000002
+#define CPUTYPE_SPC5XX  0xB000003
+#define CPUTYPE_KEA64   0xB000004
+#define CPUTYPE_THUMB   0xB000005
+#define CPUTYPE_IA32    0xB000006
+#define CPUTYPE_IA64    0xB000007
+#define CPUTYPE_PIC32   0xB000008
 
-enum {
-    CPU_NONE = 0xC000000,
-    CPU_SPC560D,
-    CPU_SKEAZN642,
-};
+#define CPU_NONE        0xC000000
+#define CPU_LPC4337     0xC000001
+#define CPU_SPC560D     0xC000002
+#define CPU_SKEAZN642   0xC000003
+#define CPU_THUMB       0xC000004
 
 
 /****** ARCH macro definitions ******/
@@ -215,34 +220,16 @@ enum {
 
 #endif
 
-#if   ( ( ARCH == x86 ) && \
-      ( ( CPUTYPE == ia32 ) || \
-        ( CPUTYPE == ia64 ) ) )
-#elif ( ( ARCH == ARCH_LINUX || ARCH == linux) )
-#elif ( ( ARCH == cortexM4 ) && \
-        ( CPUTYPE == lpc43xx ) && \
-        ( CPU == lpc4337 ) )
-#elif ( ( ARCH == cortexM0 ) && \
-        ( CPUTYPE == lpc43xx ) && \
-        ( CPU == lpc4337 ) )
-#elif ( ( ARCH == cortexM4 ) && \
-        ( CPUTYPE == k60_120 ) && \
-        ( CPU == mk60fx512vlq15 ) )
-#elif ( ( ARCH == mips ) && \
-        ( CPUTYPE == pic32 ) && \
-        ( CPU == pic32mz ) )
-#elif ( ( ARCH == cortexM4 ) && \
-        ( CPUTYPE == lpc5410x ) && \
-        ( CPU == lpc54102 ) )
-#elif ( ( ARCH == sparcV8 ) && \
-        ( CPUTYPE == leon3 ) && \
-        ( CPU == leon3nfp ) )
-#elif ( ( ARCH == cortexM0 ) && \
-        ( CPUTYPE == kea64 || CPUTYPE == CPUTYPE_KEA64 ) && \
-        ( CPU == skeazn642 || CPU == CPU_SKEAZN642 ) )
-#elif ( ( ARCH == ARCH_POWERPC || ARCH == powerpc ) && \
-      ( ( CPUTYPE == posix || CPUTYPE == CPUTYPE_POSIX ) || \
-        ( CPUTYPE == spc5xx || CPUTYPE == CPUTYPE_SPC5XX ) ) )
+#if   ( ( ARCH == ARCH_X86 )      && ( ( CPUTYPE == CPUTYPE_IA32 ) || ( CPUTYPE == CPUTYPE_IA64 ) ) )
+#elif ( ( ARCH == ARCH_CORTEXM4 ) && ( CPUTYPE == CPUTYPE_LPC43XX ) && ( CPU == CPU_LPC4337 ) )
+#elif ( ( ARCH == ARCH_CORTEXM0 ) && ( CPUTYPE == CPUTYPE_LPC43XX ) && ( CPU == CPU_LPC4337 ) )
+#elif ( ( ARCH == ARCH_CORTEXM4 ) && ( CPUTYPE == k60_120 )         && ( CPU == mk60fx512vlq15 ) )
+#elif ( ( ARCH == ARCH_MIPS )     && ( CPUTYPE == CPUTYPE_PIC32 )   && ( CPU == pic32mz ) )
+#elif ( ( ARCH == ARCH_CORTEXM4 ) && ( CPUTYPE == lpc5410x )        && ( CPU == lpc54102 ) )
+#elif ( ( ARCH == ARCH_SPARCV8 )  && ( CPUTYPE == leon3 )           && ( CPU == leon3nfp ) )
+#elif ( ( ARCH == ARCH_CORTEXM0 ) && ( CPUTYPE == CPUTYPE_THUMB )   && ( CPU == CPU_THUMB ) )
+#elif ( ( ARCH == ARCH_CORTEXM0 ) && ( CPUTYPE == CPUTYPE_KEA64 )   && ( CPU == CPU_SKEAZN642 ) )
+#elif ( ( ARCH == ARCH_LINUX )    && ( CPUTYPE == CPUTYPE_POSIX )   && ( CPU == CPU_NONE ) )
 #else
 #error the entered architecture is not supported... :(
 #endif

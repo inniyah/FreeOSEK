@@ -53,15 +53,17 @@
 /*==================[inclusions]=============================================*/
 #include "os.h"
 #include "Os_Internal_Arch.h"
+
 #ifdef OSEK_INLCUDE_INTERNAL_ARCH_CPU
 /** Os_Internal_Arch_Cpu.h is only included if the macro
  ** OSEK_INCLUDE_INTERNAL_ARCH_CPU is defined on
  ** Os_Internal_Arch.h **/
 #include "Os_Internal_Arch_Cpu.h"
 #endif /* #ifdef OSEK_INLCUDE_INTERNAL_ARCH_CPU */
+
 #include "Os_Internal_Arch_Cfg.h"
 #include "Os_Internal_Cfg.h"
-#include "ciaaPlatforms.h"
+
 #if (OSEK_MULTICORE == OSEK_ENABLE)
 #include "ciaaMulticore.h"
 #endif

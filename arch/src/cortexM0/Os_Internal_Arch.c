@@ -51,7 +51,12 @@
 
 
 
+#include "Os_Internal.h"
+
+#if (CPUTYPE_LPC43XX == CPUTYPE)
 #include "chip.h"
+#endif
+
 #include "Os_Internal.h"
 
 
@@ -179,7 +184,7 @@ void cortexM0ResetTaskContext(uint8 TaskID)
 
    taskStackRegionPtr[taskStackSizeWords - 1] = (uint32) (1 << 24);                       /* xPSR.T = 1 */
    taskStackRegionPtr[taskStackSizeWords - 2] = (uint32) TasksConst[TaskID].EntryPoint;   /* initial PC */
-   taskStackRegionPtr[taskStackSizeWords - 3] = (uint32) ReturnHook_Arch;                 /* Stacked LR */
+   taskStackRegionPtr[taskStackSizeWords - 3] = (uint32) cortexM0ReturnHook;              /* Stacked LR */
 
    /*
     *  BLOCK 2
@@ -222,13 +227,13 @@ void cortexM0ResetTaskContext(uint8 TaskID)
     *
     */
 
-   *(TasksConst[TaskID].TaskContext) = &(taskStackRegionPtr[taskStackSizeWords - 17]);
+   *(TasksConst[TaskID].TaskContext->stackTopPointer) = &(taskStackRegionPtr[taskStackSizeWords - 17]);
 
 }
 
 
 
-void cortexM0UpdateActiveTaskContextPtr()
+void cortexM0UpdateActiveTaskContextPtr(void)
 {
    if (cortexM0TerminatedTaskID != INVALID_TASK)
    {
@@ -241,6 +246,7 @@ void cortexM0UpdateActiveTaskContextPtr()
 }
 
 
+#if (CPU_LPC4337 == CPU)
 
 /* Cortex-M0 core of LPC4337 uses RIT Timer for periodic IRQ */
 void RIT_IRQHandler(void)
@@ -302,6 +308,65 @@ void RIT_IRQHandler(void)
    }
 }
 
+#endif /* CPU_LPC4337 == CPU */
+
+#if (CPU_THUMB == CPU)
+
+#include "systick.h"
+#include "printf.h"
+
+void SysTick_Handler_(void)
+{
+    printf("[SysTick]\n");
+
+    /* Store the calling context in a variable. */
+    ContextType actualContext = GetCallingContext();
+
+    /* Set ISR2 context. */
+    SetActualContext(CONTEXT_ISR2);
+
+
+#if (ALARMS_COUNT != 0)
+    /*
+     * Enter critical section.
+     * */
+    IntSecure_Start();
+
+    /*
+     * The the RTOS counter increment handler.
+     * */
+    IncrementCounter(0, 1); /* TODO CHECK ME */
+
+    /*
+     * Exit the critical section.
+     * */
+    IntSecure_End();
+
+#endif /* #if (ALARMS_COUNT != 0) */
+
+    /* reset context */
+    SetActualContext(actualContext);
+
+#if (NON_PREEMPTIVE == OSEK_DISABLE)
+
+    /*
+     * Check if the currently active task is preemptive;
+     * if it is, call schedule().
+     * */
+
+    if ( ( CONTEXT_TASK == actualContext ) &&
+         ( TasksConst[GetRunningTask()].ConstFlags.Preemtive ) )
+    {
+       /* This shall force a call to the scheduler. */
+       PostIsr2_Arch(isr);
+    }
+
+#endif /* #if (NON_PREEMPTIVE == OSEK_DISABLE) */
+
+    SYSTICK_CLEAN_IRQ();
+}
+
+#endif /* CPU_THUMB == CPU */
 
 
 /** @} doxygen end group definition */

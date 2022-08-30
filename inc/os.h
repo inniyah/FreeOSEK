@@ -56,6 +56,7 @@
 #include "Types.h"
 #include "Os_Cfg.h"
 #include "Os_Arch.h"
+#include "ciaaPlatforms.h"
 
 /*==================[macros]=================================================*/
 /** \brief TASK macro definition

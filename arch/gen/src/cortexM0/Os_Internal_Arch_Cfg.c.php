@@ -51,8 +51,10 @@
  ** @{ */
 
 /*==================[inclusions]=============================================*/
+
 #include "Os_Internal.h"
-#if (CPUTYPE == lpc43xx)
+
+#if (CPUTYPE_LPC43XX == CPUTYPE)
 /* THIS IS A DIRTY WORKAROUND :( ciaa/Firmware#309*/
 #undef FALSE
 #undef TRUE
@@ -68,15 +70,24 @@
 /*==================[internal data definition]===============================*/
 
 /*==================[external data definition]===============================*/
-#if (CPU == lpc4337)
-/* ResetISR is defined in cr_startup_lpc43xx.c */
+
 extern void ResetISR(void);
 
 /** \brief External declaration for the pointer to the stack top from the Linker Script */
-extern void _vStackTop(void);
-#else
-#error Not supported CPU
-#endif
+<?php
+ switch ($this->definitions["CPU"])
+{
+	case "thumb":
+		echo "extern void __stack(void);\n";
+		break;
+	case "lpc4337":
+		echo "extern void _vStackTop(void);\n";
+		break;
+	default:
+		#error Not supported CPU
+		break;
+}
+?>
 
 /** \brief Handlers used by OSEK */
 extern void PendSV_Handler(void);
@@ -85,16 +96,24 @@ extern void PendSV_Handler(void);
 
 /* remove soon
  * you can load the helper here with
-   $this->loadHelper("modules/rtos/gen/ginc/Multicore.php");
+   $this->loadHelper("gen/ginc/Multicore.php");
 
  * or when calling generator.php with
-   -H modules/rtos/gen/ginc/Multicore.php
+   -H gen/ginc/Multicore.php
  *
 */
 
 if ($this->definitions["ARCH"] == "cortexM0")
 {
-   echo "extern void RIT_IRQHandler(void);\n";
+   switch ($this->definitions["CPU"])
+   {
+      case "thumb":
+         echo "extern void SysTick_Handler(void);\n";
+         break;
+      case "lpc4337":
+         echo "extern void RIT_IRQHandler(void);\n";
+         break;
+   }
 }
 ?>
 
@@ -125,6 +144,43 @@ void DebugMon_Handler(void) {
 <?php
 switch ($this->definitions["CPU"])
 {
+   case "thumb":
+      $intList = array (
+         0 => "RESERVED16",
+         1 => "RESERVED17",
+         2 => "RESERVED18",
+         3 => "RESERVED19",
+         4 => "RESERVED20",
+         5 => "FTMRH",
+         6 => "PMC",
+         7 => "IRQ",
+         8 => "I2C0",
+         9 => "RESERVED25",
+         10 => "SPI0",
+         11 => "SPI1",
+         12 => "UART0",
+         13 => "UART1",
+         14 => "UART2",
+         15 => "ADC0",
+         16 => "ACMP0",
+         17 => "FTM0",
+         18 => "FTM1",
+         19 => "FTM2",
+         20 => "RTC",
+         21 => "ACMP1",
+         22 => "PIT_CH0",
+         23 => "PIT_CH1",
+         24 => "KBI0",
+         25 => "KBI1",
+         26 => "RESERVED42",
+         27 => "ICS",
+         28 => "WDOG",
+         29 => "RESERVED45",
+         30 => "RESERVED46",
+         31 => "RESERVED47",
+      );
+      break;
+
    case "lpc4337":
       /* Interrupt sources for LPC43xx (Cortex-M0 core).
        * See externals/platforms/cortexM0/lpc43xx/inc/cmsis_43xx_m0app.h.
@@ -172,8 +228,28 @@ switch ($this->definitions["CPU"])
 
 $MAX_INT_COUNT = max(array_keys($intList))+1;
 
-if ($this->definitions["CPU"] == "lpc4337") : ?>
-/** \brief LPC4337 Interrupt vector */
+if ($this->definitions["CPU"] == "thumb") : ?>
+/** \brief Interrupt vector */
+__attribute__ ((section(".isr_vector")))
+void (* const g_pfnVectors[])(void) = {
+   &__stack,                       /* The initial stack pointer  */
+   ResetISR,                       /* The reset handler          */
+   NMI_Handler,                    /* The NMI handler            */
+   HardFault_Handler,              /* The hard fault handler     */
+   0,                              /* The MPU fault handler      */
+   0,                              /* The bus fault handler      */
+   0,                              /* The usage fault handler    */
+   0,                              /* Reserved                   */
+   0,                              /* Reserved                   */
+   0,                              /* Reserved                   */
+   0,                              /* Reserved                   */
+   0,                              /* SVCall handler             */
+   0,                              /* Debug monitor handler      */
+   0,                              /* Reserved                   */
+   0,                              /* The PendSV handler         */
+   SysTick_Handler,                /* The SysTick handler        */
+<?php elseif ($this->definitions["CPU"] == "lpc4337") : ?>
+/** \brief Interrupt vector */
 __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) = {
    /* System ISRs */
@@ -206,7 +282,7 @@ $intnames = $this->helper->multicore->getLocalList("/OSEK", "ISR");
 for($i=0; $i < $MAX_INT_COUNT; $i++)
 {
    /* LPC4337-CortexM0 core uses RIT timer for OSEK periodic interrupt */
-   if( ($i==11) && ($this->definitions["ARCH"] == "cortexM0") )
+   if( ($i==11) && ($this->definitions["ARCH"] == "cortexM0") && ($this->definitions["CPU"] == "lpc4337") )
    {
       print "   RIT_IRQHandler,\n";
    }
