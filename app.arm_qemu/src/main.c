@@ -2,6 +2,10 @@
 #include "systick.h"
 #include "printf.h"
 
+#include "Os_Internal_Arch_Cfg.h"
+#include "Os_Internal_Cfg.h"
+
+
 void PUT32 ( unsigned int, unsigned int );
 unsigned int GET32 ( unsigned int );
 unsigned int GET8 ( unsigned int );
@@ -30,6 +34,14 @@ void SystemInit(void) {
 }
 
 void main ( void ) {
+    printf("[Tasks]\n");
+    for (unsigned int loopi = 0; loopi < TASKS_COUNT; loopi++) {
+        printf("[Task %u]  ->  Entry Point: 0x%08X,  Stack Base: 0x%08X,  Stack Size: 0x%08X,  Initial SP: 0x%08X\n",
+            loopi, (uintptr_t)TasksConst[loopi].EntryPoint, (uintptr_t)TasksConst[loopi].StackPtr, (uintptr_t)TasksConst[loopi].StackSize,
+            (uintptr_t) (TasksConst[loopi].StackPtr + TasksConst[loopi].StackSize - 4)
+        );
+    }
+
     printf("[SystemInit]\n");
     SystemInit();
 
