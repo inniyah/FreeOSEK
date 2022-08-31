@@ -362,6 +362,7 @@ disasm: all
 
 
 run: $(OUT_DIR)/$(APP_NAME).bin
+	@echo Press [CRTL]a x to exit
 	qemu-system-arm -M lm3s811evb -m 8K -nographic -kernel "$<"
 
 

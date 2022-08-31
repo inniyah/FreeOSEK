@@ -315,9 +315,10 @@ void RIT_IRQHandler(void)
 #include "systick.h"
 #include "printf.h"
 
-void SysTick_Handler_(void)
+__attribute__ ((section(".after_vectors")))
+void SysTick_Handler(void)
 {
-    printf("[SysTick]\n");
+    _putchar('*');
 
     /* Store the calling context in a variable. */
     ContextType actualContext = GetCallingContext();

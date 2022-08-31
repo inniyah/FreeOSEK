@@ -120,21 +120,25 @@ if ($this->definitions["ARCH"] == "cortexM0")
 /*==================[internal functions definition]==========================*/
 /* Default exception handlers. */
 __attribute__ ((section(".after_vectors")))
+__attribute__((weak))
 void NMI_Handler(void) {
     while (1) {
     }
 }
 __attribute__ ((section(".after_vectors")))
+__attribute__((weak))
 void HardFault_Handler(void) {
     while (1) {
     }
 }
 __attribute__ ((section(".after_vectors")))
+__attribute__((weak))
 void SVC_Handler(void) {
     while (1) {
     }
 }
 __attribute__ ((section(".after_vectors")))
+__attribute__((weak))
 void DebugMon_Handler(void) {
     while (1) {
     }
@@ -243,7 +247,7 @@ void (* const g_pfnVectors[])(void) = {
    0,                              /* Reserved                   */
    0,                              /* Reserved                   */
    0,                              /* Reserved                   */
-   0,                              /* SVCall handler             */
+   SVC_Handler,                    /* SVCall handler             */
    0,                              /* Debug monitor handler      */
    0,                              /* Reserved                   */
    0,                              /* The PendSV handler         */
