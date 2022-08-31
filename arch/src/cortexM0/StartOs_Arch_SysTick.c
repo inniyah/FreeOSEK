@@ -54,8 +54,13 @@
 #include "ciaaPlatforms.h"
 
 
-#if (CPU == lpc4337)
+#if (CPU_LPC4337 == CPU)
 #include "chip.h"
+#endif
+
+#if (defined(DEBUG) && CPU_THUMB == CPU)
+#include "printf.h"
+void puts( const char * str );
 #endif
 
 
@@ -114,9 +119,13 @@ void StartOs_Arch_SysTick(void)
 
 void StartOs_Arch_SysTick(void)
 {
-    //~ PUT32(SYSTICK_CTRL_REG,   0x00000004);
-    //~ PUT32(SYSTICK_RELOAD_REG, 1000 - 1);   // Set the Reload value for required tick in STRELOAD.
-    //~ PUT32(SYSTICK_CTRL_REG,   0x00000007); // Enabled Systick Module, Select the CPU Clock Source and enable the SysTick interrupt
+#if (defined(DEBUG) && CPU_THUMB == CPU)
+printf("Starting OS Arch Systick");
+#endif
+
+    PUT32(SYSTICK_CTRL_REG,   0x00000004);
+    PUT32(SYSTICK_RELOAD_REG, 1000 - 1);   // Set the Reload value for required tick in STRELOAD.
+    PUT32(SYSTICK_CTRL_REG,   0x00000007); // Enabled Systick Module, Select the CPU Clock Source and enable the SysTick interrupt
 }
 
 #endif /* CPU_THUMB == CPU */

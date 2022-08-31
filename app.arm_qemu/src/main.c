@@ -34,7 +34,7 @@ void SysTick_Handler ( void ) {
 #endif
 
 void SystemInit(void) {
-#if 1
+#if 0
     PUT32(SYSTICK_CTRL_REG,   0x00000004);
     PUT32(SYSTICK_RELOAD_REG, 1000 - 1);   // Set the Reload value for required tick in STRELOAD.
     PUT32(SYSTICK_CTRL_REG,   0x00000007); // Enabled Systick Module, Select the CPU Clock Source and enable the SysTick interrupt
