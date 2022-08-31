@@ -222,7 +222,6 @@ OBJS= \
 	$(OBJ_DIR)/$(APP_SUBDIR)/Os_Cfg.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/Os_Internal_Cfg.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/$(ARCH_SUBDIR)/Os_Internal_Arch_Cfg.o \
-	$(OBJ_DIR)/$(APP_SUBDIR)/vectors.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/sysfunc.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/startup.o \
 	$(OBJ_DIR)/$(APP_SUBDIR)/main.o \
@@ -232,6 +231,7 @@ OBJS= \
 	$(OBJ_DIR)/arch/Os_Internal_Arch.o \
 	$(OBJ_DIR)/arch/StartOs_Arch.o \
 	$(OBJ_DIR)/arch/StartOs_Arch_SysTick.o \
+	$(OBJ_DIR)/arch/PendSV.o \
 	$(OBJ_DIR)/osek/ActivateTask.o \
 	$(OBJ_DIR)/osek/CancelAlarm.o \
 	$(OBJ_DIR)/osek/ChainTask.o \
