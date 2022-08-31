@@ -367,8 +367,12 @@ run: $(OUT_DIR)/$(APP_NAME).bin
 
 
 debug: $(OUT_DIR)/$(APP_NAME).bin
-	@echo gdb-multiarch --ex="set arch armv5te" --ex="set sysroot /usr/arm-linux-gnueabihf/" --ex="target remote localhost:1234" --ex="break main" $(<:.bin=.elf)
+	@echo Alternatives:
+	@echo gdb-multiarch --ex="set arch armv5te" --ex="set sysroot /usr/arm-linux-gnueabihf/" --ex="target remote localhost:1234" --ex="break main" "$(<:.bin=.elf)"
 	@echo ddd --debugger 'gdb-multiarch --ex="set arch armv5te" --ex="set sysroot /usr/arm-linux-gnueabihf/" --ex="target remote localhost:1234" --ex="break main" $(<:.bin=.elf)' --gdb
+	@echo nemiver --remote=localhost:1234 --gdb-binary=/usr/bin/gdb-multiarch "$(<:.bin=.elf)"
+
+	( sleep 3 && nemiver --remote=localhost:1234 --gdb-binary=/usr/bin/gdb-multiarch "$(<:.bin=.elf)" ) &
 	qemu-system-arm -M lm3s811evb -m 8K -nographic -s -S -kernel "$<"
 
 
