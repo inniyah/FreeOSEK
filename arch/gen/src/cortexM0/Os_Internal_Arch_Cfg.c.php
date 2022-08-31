@@ -250,7 +250,7 @@ void (* const g_pfnVectors[])(void) = {
    SVC_Handler,                    /* SVCall handler             */
    0,                              /* Debug monitor handler      */
    0,                              /* Reserved                   */
-   0,                              /* The PendSV handler         */
+   PendSV_Handler,                 /* The PendSV handler         */
    SysTick_Handler,                /* The SysTick handler        */
 <?php elseif ($this->definitions["CPU"] == "lpc4337") : ?>
 /** \brief Interrupt vector */
