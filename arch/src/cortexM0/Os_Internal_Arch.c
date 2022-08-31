@@ -236,7 +236,7 @@ printf("Reseting Task Context for %d\n", TaskID);
     *
     */
 
-   *(TasksConst[TaskID].TaskContext->stackTopPointer) = &(taskStackRegionPtr[taskStackSizeWords - 17]);
+   *(TasksConst[TaskID].TaskContext) = &(taskStackRegionPtr[taskStackSizeWords - 17]);
 
 }
 
@@ -326,13 +326,10 @@ void RIT_IRQHandler(void)
 #if (CPU_THUMB == CPU)
 
 #include "systick.h"
-#include "printf.h"
 
 __attribute__ ((section(".after_vectors")))
 void SysTick_Handler(void)
 {
-    _putchar('*');
-
     /* Store the calling context in a variable. */
     ContextType actualContext = GetCallingContext();
 

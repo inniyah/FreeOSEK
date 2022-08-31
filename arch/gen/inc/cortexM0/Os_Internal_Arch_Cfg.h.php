@@ -64,11 +64,7 @@
 
 
 /** \brief Task Context Type */
-typedef struct {
-
-   uint32 *stackTopPointer;
-
-} TaskContextType;
+typedef uint32 * TaskContextType;
 
 /** \brief Task Context Type */
 typedef TaskContextType* TaskContextRefType;
