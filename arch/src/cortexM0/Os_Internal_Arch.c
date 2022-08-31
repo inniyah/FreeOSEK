@@ -57,13 +57,6 @@
 #include "chip.h"
 #endif
 
-#include "Os_Internal.h"
-
-#if (defined(DEBUG) && CPU_THUMB == CPU)
-#include "printf.h"
-void puts( const char * str );
-#endif
-
 
 
 /*==================[macros and definitions]=================================*/
@@ -124,10 +117,6 @@ void cortexM0ReturnHook(void)
 /* Task Stack Initialization */
 void cortexM0ResetTaskContext(uint8 TaskID)
 {
-#if (defined(DEBUG) && CPU_THUMB == CPU)
-printf("Reseting Task Context for %d\n", TaskID);
-#endif
-
    uint32_t *taskStackRegionPtr;
    int32_t taskStackSizeWords;
 
@@ -244,10 +233,6 @@ printf("Reseting Task Context for %d\n", TaskID);
 
 void cortexM0UpdateActiveTaskContextPtr(void)
 {
-#if (defined(DEBUG) && CPU_THUMB == CPU)
-printf("Changing Task Context to %d\n", RunningTask);
-#endif
-
    if (cortexM0TerminatedTaskID != INVALID_TASK)
    {
       cortexM0ResetTaskContext(cortexM0TerminatedTaskID);
