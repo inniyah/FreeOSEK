@@ -7,9 +7,9 @@
 #~     bl main
 #~     b hang
 
-.thumb_func
-.globl hang
-hang:   b .
+# .thumb_func
+# .globl hang
+# hang:   b .
 
 .thumb_func
 .globl GETPC
