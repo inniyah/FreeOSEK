@@ -81,7 +81,7 @@
  ** The typo must be preserved because this is how the macro is called on the
  ** FreeOSEK source code.
  **/
-#define OSEK_INLCUDE_INTERNAL_ARCH_CPU
+#define OSEK_INCLUDE_INTERNAL_ARCH_CPU
 
 
 /** \brief Interrupt Secure Start Macro
