@@ -75,11 +75,11 @@
 
 
 
-TaskType cortexM0TerminatedTaskID = INVALID_TASK;
+void *Osek_NewTaskPtr_Arch;
+void *Osek_OldTaskPtr_Arch;
 
-TaskContextType cortexM0NullContext;
-
-TaskContextRefType cortexM0ActiveContextPtr = &cortexM0NullContext;
+TaskType TerminatingTask = INVALID_TASK;
+TaskType WaitingTask = INVALID_TASK;
 
 
 
@@ -95,7 +95,7 @@ TaskContextRefType cortexM0ActiveContextPtr = &cortexM0NullContext;
 
 
 
-void cortexM0ReturnHook(void)
+void ReturnHook_Arch(void)
 {
    /*
     * Tasks shouldn't return here...
@@ -114,8 +114,26 @@ void cortexM0ReturnHook(void)
 
 
 
+void CheckTerminatingTask_Arch(void)
+{
+   /*
+    * If there is task being terminated, destroy its context information and
+    * reset its state so that the next time that the task is activated it
+    * starts its execution on the first instruction of the task body.
+    * */
+
+   if(TerminatingTask != INVALID_TASK)
+   {
+      InitStack_Arch(TerminatingTask);
+   }
+
+   TerminatingTask = INVALID_TASK;
+}
+
+
+
 /* Task Stack Initialization */
-void cortexM0ResetTaskContext(uint8 TaskID)
+void InitStack_Arch(uint8 TaskID)
 {
    uint32_t *taskStackRegionPtr;
    int32_t taskStackSizeWords;
@@ -182,7 +200,7 @@ void cortexM0ResetTaskContext(uint8 TaskID)
 
    taskStackRegionPtr[taskStackSizeWords - 1] = (uint32) (1 << 24);                       /* xPSR.T = 1 */
    taskStackRegionPtr[taskStackSizeWords - 2] = (uint32) TasksConst[TaskID].EntryPoint;   /* initial PC */
-   taskStackRegionPtr[taskStackSizeWords - 3] = (uint32) cortexM0ReturnHook;              /* Stacked LR */
+   taskStackRegionPtr[taskStackSizeWords - 3] = (uint32) ReturnHook_Arch;                 /* Stacked LR */
 
    /*
     *  BLOCK 2
@@ -230,25 +248,10 @@ void cortexM0ResetTaskContext(uint8 TaskID)
 }
 
 
-
-void cortexM0UpdateActiveTaskContextPtr(void)
-{
-   if (cortexM0TerminatedTaskID != INVALID_TASK)
-   {
-      cortexM0ResetTaskContext(cortexM0TerminatedTaskID);
-
-      cortexM0TerminatedTaskID = INVALID_TASK;
-   }
-
-   cortexM0ActiveContextPtr = TasksConst[RunningTask].TaskContext;
-}
-
-
 #if (CPU_LPC4337 == CPU)
 
 /* Cortex-M0 core of LPC4337 uses RIT Timer for periodic IRQ */
-void RIT_IRQHandler(void)
-{
+void RIT_IRQHandler(void) {
    if(Chip_RIT_GetIntStatus(LPC_RITIMER) == SET)
    {
       /* Store the calling context in a variable. */
@@ -306,15 +309,66 @@ void RIT_IRQHandler(void)
    }
 }
 
-#endif /* CPU_LPC4337 == CPU */
+#endif /* CPU == lpc4337 */
+
+#if (CPU == CPU_SKEAZN642)
+
+void SysTick_Handler(void) {
+    /* Store the calling context in a variable. */
+    ContextType actualContext = GetCallingContext();
+
+    /* Set ISR2 context. */
+    SetActualContext(CONTEXT_ISR2);
+
+
+#if (ALARMS_COUNT != 0)
+    /*
+     * Enter critical section.
+     * */
+    IntSecure_Start();
+
+    /*
+     * The the RTOS counter increment handler.
+     * */
+    IncrementCounter(0, 1); /* TODO CHECK ME */
+
+    /*
+     * Exit the critical section.
+     * */
+    IntSecure_End();
+
+#endif /* #if (ALARMS_COUNT != 0) */
+
+    /* reset context */
+    SetActualContext(actualContext);
+
+#if (NON_PREEMPTIVE == OSEK_DISABLE)
+
+    /*
+     * Check if the currently active task is preemptive;
+     * if it is, call schedule().
+     * */
+
+    if ( ( CONTEXT_TASK == actualContext ) &&
+         ( TasksConst[GetRunningTask()].ConstFlags.Preemtive ) )
+    {
+       /* This shall force a call to the scheduler. */
+       PostIsr2_Arch(isr);
+    }
+
+#endif /* #if (NON_PREEMPTIVE == OSEK_DISABLE) */
+
+    NVIC_ClearPendingIRQ(SysTick_IRQn);
+}
+
+#endif /* CPU == CPU_SKEAZN642 */
 
 #if (CPU_THUMB == CPU)
 
 #include "systick.h"
 
 __attribute__ ((section(".after_vectors")))
-void SysTick_Handler(void)
-{
+void SysTick_Handler(void) {
     /* Store the calling context in a variable. */
     ContextType actualContext = GetCallingContext();
 
@@ -363,7 +417,6 @@ void SysTick_Handler(void)
 }
 
 #endif /* CPU_THUMB == CPU */
-
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */

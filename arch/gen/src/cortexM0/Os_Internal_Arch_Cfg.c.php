@@ -71,6 +71,7 @@
 
 /*==================[external data definition]===============================*/
 
+  /* ResetISR is defined in startup.c */
 extern void ResetISR(void);
 
 /** \brief External declaration for the pointer to the stack top from the Linker Script */
@@ -82,6 +83,9 @@ extern void ResetISR(void);
 		break;
 	case "lpc4337":
 		echo "extern void _vStackTop(void);\n";
+		break;
+	case "skeazn642":
+		echo "extern void __stack(void);\n";
 		break;
 	default:
 		#error Not supported CPU
@@ -112,6 +116,9 @@ if ($this->definitions["ARCH"] == "cortexM0")
          break;
       case "lpc4337":
          echo "extern void RIT_IRQHandler(void);\n";
+         break;
+      case "skeazn642":
+         echo "extern void SysTick_Handler(void);\n";
          break;
    }
 }
@@ -225,17 +232,61 @@ switch ($this->definitions["CPU"])
       );
       break;
 
+   case "skeazn642": /* TO DO */
+      /* Interrupt sources for LPC43xx (Cortex-M0 core).
+       * See externals/platforms/cortexM0/lpc43xx/inc/cmsis_43xx_m0app.h.
+       */
+      $intList = array (
+         0 => "RESERVED16",
+         1 => "RESERVED17",
+         2 => "RESERVED18",
+         3 => "RESERVED19",
+         4 => "RESERVED20",
+         5 => "FTMRH",
+         6 => "PMC",
+         7 => "IRQ",
+         8 => "I2C0",
+         9 => "RESERVED25",
+         10 => "SPI0",
+         11 => "SPI1",
+         12 => "UART0",
+         13 => "UART1",
+         14 => "UART2",
+         15 => "ADC0",
+         16 => "ACMP0",
+         17 => "FTM0",
+         18 => "FTM1",
+         19 => "FTM2",
+         20 => "RTC",
+         21 => "ACMP1",
+         22 => "PIT_CH0",
+         23 => "PIT_CH1",
+         24 => "KBI0",
+         25 => "KBI1",
+         26 => "RESERVED42",
+         27 => "ICS",
+         28 => "WDOG",
+         29 => "RESERVED45",
+         30 => "RESERVED46",
+         31 => "RESERVED47",
+      );
+      break;
+
    default:
       error("the CPU " . $this->definitions["CPU"] . " is not supported.");
       break;
 }
 
 $MAX_INT_COUNT = max(array_keys($intList))+1;
+?>
 
-if ($this->definitions["CPU"] == "thumb") : ?>
 /** \brief Interrupt vector */
 __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) = {
+
+<?php if ($this->definitions["CPU"] == "thumb") : ?>
+
+   /* System ISRs */
    &__stack,                       /* The initial stack pointer  */
    ResetISR,                       /* The reset handler          */
    NMI_Handler,                    /* The NMI handler            */
@@ -252,10 +303,9 @@ void (* const g_pfnVectors[])(void) = {
    0,                              /* Reserved                   */
    PendSV_Handler,                 /* The PendSV handler         */
    SysTick_Handler,                /* The SysTick handler        */
+
 <?php elseif ($this->definitions["CPU"] == "lpc4337") : ?>
-/** \brief Interrupt vector */
-__attribute__ ((section(".isr_vector")))
-void (* const g_pfnVectors[])(void) = {
+
    /* System ISRs */
    &_vStackTop,                    /* The initial stack pointer  */
    ResetISR,                       /* The reset handler          */
@@ -273,6 +323,26 @@ void (* const g_pfnVectors[])(void) = {
    0,                              /* Reserved                   */
    PendSV_Handler,                 /* The PendSV handler         */
    0,                              /* The SysTick handler        */
+
+<?php elseif ($this->definitions["CPU"] == "skeazn642") : ?>
+
+   /* System ISRs */
+   &__stack,                       /* The initial stack pointer  */
+   ResetISR,                       /* The reset handler          */
+   NMI_Handler,                    /* The NMI handler            */
+   HardFault_Handler,              /* The hard fault handler     */
+   0,                              /* The MPU fault handler      */
+   0,                              /* The bus fault handler      */
+   0,                              /* The usage fault handler    */
+   0,                              /* Reserved                   */
+   0,                              /* Reserved                   */
+   0,                              /* Reserved                   */
+   0,                              /* Reserved                   */
+   SVC_Handler,                    /* SVCall handler             */
+   0,                              /* Debug monitor handler      */
+   0,                              /* Reserved                   */
+   PendSV_Handler,                 /* The PendSV handler         */
+   SysTick_Handler,                /* The SysTick handler        */
 <?php else :
       error("Not supported CPU: " . $this->definitions["CPU"]);
    endif;

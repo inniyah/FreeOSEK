@@ -186,7 +186,7 @@ void DebugMon_Handler(void) {
 
 
 <?php
-$this->loadHelper("modules/rtos/gen/ginc/Multicore.php");
+$this->loadHelper("gen/ginc/Multicore.php");
 
 switch ($this->definitions["CPU"])
 {

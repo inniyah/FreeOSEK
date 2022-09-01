@@ -49,7 +49,7 @@
    .syntax unified
 
    .global PendSV_Handler
-   .extern cortexM0ActiveContextPtr,cortexM0UpdateActiveTaskContextPtr
+   .extern Osek_OldTaskPtr_Arch, Osek_NewTaskPtr_Arch, CheckTerminatingTask_Arch
 
 /* Pendable Service Call, used for context-switching in all Cortex-M processors */
 PendSV_Handler:
@@ -69,6 +69,20 @@ PendSV_Handler:
     * */
 
    cpsid f
+
+   /*
+    * Check if the currently active task is being removed. If it is,
+    * reset the task's context data block.
+    *
+    * This is done in an external C routine.
+    *
+    * */
+
+   mov r0,lr
+   push {r0}
+   bl CheckTerminatingTask_Arch
+   pop {r0}
+   mov lr,r0
 
    /*
     * Use MSP to store context.
@@ -139,33 +153,12 @@ PendSV_Handler:
     * CheckTerminatingTask_Arch at the start of the handler.
     */
 
-   ldr r1,=cortexM0ActiveContextPtr
+   ldr r1,=Osek_OldTaskPtr_Arch
    ldr r1,[r1]
+   cmp r1,0
+   beq dont_save_current_context
    str r0,[r1]
-
-   /* ************************************* */
-   /* ************************************* */
-   /* ************************************* */
-
-
-   /*
-    * Update the pointer to the context data of the
-    * currently active task.
-    *
-    * This is done in an external C routine.
-    * */
-
-   mov r0,lr
-   push {r0}
-
-   bl cortexM0UpdateActiveTaskContextPtr
-
-   pop {r0}
-   mov lr,r0
-
-   /* ************************************* */
-   /* ************************************* */
-   /* ************************************* */
+dont_save_current_context:
 
    /*
     * Load the stack pointer of the task being activated from that task's
@@ -175,7 +168,7 @@ PendSV_Handler:
     * some task needs to be activated.
     * */
 
-   ldr r1,=cortexM0ActiveContextPtr
+   ldr r1,=Osek_NewTaskPtr_Arch
    ldr r1,[r1]
    ldr r0,[r1]
 

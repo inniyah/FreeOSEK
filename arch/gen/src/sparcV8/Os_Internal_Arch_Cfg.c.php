@@ -84,7 +84,7 @@
 
 
 <?php
-$this->loadHelper("modules/rtos/gen/ginc/Multicore.php");
+$this->loadHelper("gen/ginc/Multicore.php");
 
 /*
  * Synchronous trap sources for SPARC processors.

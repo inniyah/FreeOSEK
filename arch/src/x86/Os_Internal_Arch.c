@@ -59,6 +59,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <pthread.h>
+#include <time.h>
+#include <signal.h>
 
 /*==================[macros and definitions]=================================*/
 
@@ -69,7 +71,7 @@
 /*==================[internal data definition]===============================*/
 
 /*==================[external data definition]===============================*/
-uint8 InterruptState;
+extern uint8 InterruptState;
 
 uint32 OsekHWTimer0;
 
@@ -222,7 +224,7 @@ void* HWTimerThread(void *pThread_Arg)
 
    if (timer <= 2)
    {
-      /* intererupt every
+      /* interrupt every
        * 0 seconds and
        * 10 ms */
       rqtp.tv_sec=0;

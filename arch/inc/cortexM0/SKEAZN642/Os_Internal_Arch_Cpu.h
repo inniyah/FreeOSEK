@@ -1,5 +1,7 @@
-/* Copyright 2015, Pablo Ridolfi (UTN-FRBA)
- * Copyright 2018, Gerardo Puga (UNLP)
+/* Copyright 2014, ACSE & CADIEEL
+ *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
+ *      CADIEEL: http://www.cadieel.org.ar
+ * Copyright 2015, Pablo Ridolfi
  * All rights reserved.
  *
  * This file is part of CIAA Firmware.
@@ -32,12 +34,13 @@
  *
  */
 
-/** \brief FreeOSEK Os StartOs Architecture Dependece Implementation File
+#ifndef _OS_INTERNAL_ARCH_CPU_H_
+#define _OS_INTERNAL_ARCH_CPU_H_
+
+/** \brief FreeOSEK Internal Architecture Cpu Dependent Header File
  **
- ** This file implements the StartOs Arch API
- **
- ** \file cortexM0/StartOs_Arch.c
- ** \arch cortexM0
+ ** \file cortexM0/lpc43xx/Os_Internal_Arch_Cpu.h
+ ** \arch cortexM0/lpc43xx
  **/
 
 /** \addtogroup FreeOSEK
@@ -49,65 +52,32 @@
 
 
 
+/*==================[cpu macros]=============================================*/
+
+
+
 /*==================[inclusions]=============================================*/
 
+#include "SKEAZN642.h"
+#include "core_cm0plus.h"
 
-
-#include "Os_Internal.h"
-#include "StartOs_Arch_SysTick.h"
-
-
-
-/*==================[macros and definitions]=================================*/
+/*==================[macros]=================================================*/
 
 
 
-/*==================[internal data declaration]==============================*/
+/*==================[typedef]================================================*/
 
 
 
-/*==================[internal functions declaration]=========================*/
+/*==================[external data declaration]==============================*/
 
 
 
-/*==================[internal data definition]===============================*/
+/*==================[external functions declaration]=========================*/
 
 
 
-/*==================[external data definition]===============================*/
-
-
-
-/*==================[internal functions definition]==========================*/
-
-
-
-/*==================[external functions definition]==========================*/
-
-
-
-void StartOs_Arch_Cpu(void)
-{
-   StartOs_Arch_SysTick();
-   Enable_User_ISRs();
-}
-
-
-
-void StartOs_Arch(void)
-{
-   uint8f loopi;
-
-   /* Initialize all the application tasks. */
-   for( loopi = 0; loopi < TASKS_COUNT; loopi++)
-   {
-      InitStack_Arch(loopi);
-   }
-
-   /* CPU dependent initialization. */
-   StartOs_Arch_Cpu();
-
-}
+void StartOs_Arch_Cpu(void);
 
 
 
@@ -115,3 +85,4 @@ void StartOs_Arch(void)
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
+#endif /* #ifndef _OS_INTERNAL_ARCH_CPU_H_ */

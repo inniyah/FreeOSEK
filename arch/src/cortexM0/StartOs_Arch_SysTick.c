@@ -58,6 +58,10 @@
 #include "chip.h"
 #endif
 
+#if (CPU_THUMB == CPU)
+#include "systick.h"
+#endif
+
 
 
 /*==================[macros and definitions]=================================*/
@@ -86,37 +90,47 @@
 
 /*==================[external functions definition]==========================*/
 
+void StartOs_Arch_SysTick(void) {
 
 #if (CPU_LPC4337 == CPU)
 
-void StartOs_Arch_SysTick(void) {
-   /* Set lowest priority for PendSV */
-   NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
+	/* Enable and Set priority for PendSV irq */
+	NVIC_EnableIRQ(PendSV_IRQn); /*TODO Check if this is necessary*/
+	NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
 
-   /* Activate Repetitive Interrupt Timer (RIT) for periodic IRQs */
-   Chip_RIT_Init(LPC_RITIMER);
-   Chip_RIT_SetTimerInterval(LPC_RITIMER, 1); /* 1ms Period */
-   Chip_RIT_Enable(LPC_RITIMER);
+	/* Activate Repetitive Interrupt Timer (RIT) for periodic IRQs */
+	Chip_RIT_Init(LPC_RITIMER);
+	Chip_RIT_SetTimerInterval(LPC_RITIMER, 1); /* 1ms Period */
+	Chip_RIT_Enable(LPC_RITIMER);
 
-   /* Enable IRQ for RIT */
-   NVIC_EnableIRQ(RITIMER_IRQn);
+	/* Enable and set priority for RIT irq */
+	NVIC_EnableIRQ(RITIMER_IRQn);
+	NVIC_SetPriority(RITIMER_IRQn, (1<<__NVIC_PRIO_BITS) - 1);
 
-   /* Set lowest priority for RIT */
-   NVIC_SetPriority(RITIMER_IRQn, (1<<__NVIC_PRIO_BITS) - 1);
+#elif (CPU_SKEAZN642 == CPU)
+
+	/* Enable and Set priority for PendSV irq */
+	NVIC_EnableIRQ(PendSV_IRQn); /*TODO Check if this is necessary*/
+	NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
+
+	/* Activate Systick timer for periodic IRQs */
+	SysTick->CTRL  = 0;
+	SysTick->LOAD  = (32*1000); // 1ms
+	NVIC_SetPriority (SysTick_IRQn, (1<<__NVIC_PRIO_BITS) - 1);  /* set Priority for Systick Interrupt */
+	SysTick->VAL   = 0UL;                          /* Load the SysTick Counter Value */
+	SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk | SysTick_CTRL_TICKINT_Msk;
+
+	/* Enable and set priority for Systick irq */
+	NVIC_EnableIRQ(SysTick_IRQn);
+	NVIC_SetPriority (SysTick_IRQn, (1<<__NVIC_PRIO_BITS) - 1);  /* set Priority for Systick Interrupt */
+
+#elif (CPU_THUMB == CPU)
+
+    SYSTICK_SETUP();
+
+#endif
+
 }
-
-#endif /* CPU_LPC4337 == CPU */
-
-#if (CPU_THUMB == CPU)
-
-#include "systick.h"
-
-void StartOs_Arch_SysTick(void) {
-    SYSTICK_SETUP()
-}
-
-#endif /* CPU_THUMB == CPU */
-
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */

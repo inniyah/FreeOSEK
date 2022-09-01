@@ -103,7 +103,7 @@ foreach ($tasks as $task)
       $stack_size += 4;
    }
    print "/** \brief $task stack */\n";
-   print "#if ( x86 == ARCH || linux == ARCH )\n";
+   print "#if ( ARCH == ARCH_X86 || ARCH_LINUX == ARCH || CPUTYPE_POSIX == CPUTYPE )\n";
    print "uint8 StackTask" . $task . "[" . $stack_size ." + TASK_STACK_ADDITIONAL_SIZE];\n";
    print "#else\n";
    print "uint8 StackTask" . $task . "[" . $stack_size ."];\n";

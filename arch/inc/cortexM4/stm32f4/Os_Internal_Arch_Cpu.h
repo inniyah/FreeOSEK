@@ -1,8 +1,6 @@
 /* Copyright 2014, ACSE & CADIEEL
  *      ACSE: http://www.sase.com.ar/asociacion-civil-sistemas-embebidos/ciaa/
  *      CADIEEL: http://www.cadieel.org.ar
- * Copyright 2015, Pablo Ridolfi
- * All rights reserved.
  *
  * This file is part of CIAA Firmware.
  *
@@ -39,8 +37,8 @@
 
 /** \brief FreeOSEK Internal Architecture Cpu Dependent Header File
  **
- ** \file cortexM0/lpc43xx/Os_Internal_Arch_Cpu.h
- ** \arch cortexM0/lpc43xx
+ ** \file cortexM4/stm32f4/Os_Internal_Arch_Cpu.h
+ ** \arch cortexM4/stm32f4
  **/
 
 /** \addtogroup FreeOSEK
@@ -50,38 +48,81 @@
 /** \addtogroup FreeOSEK_Os_Internal
  ** @{ */
 
+/*****************************************************************************
+ * add your name to the developers and create for you a nick with
+ * 3 or 4 letters. Please do not use any given nick.
+ *
+ * PLEASE REMOVE THIS COMMENT
+ *****************************************************************************/
+/*
+ * Initials     Name
+ * ---------------------------
+ * PR		Pablo Ridolfi
+ */
 
+/*****************************************************************************
+ * add a new version to this file, add the date, your initials and the main
+ * changes, only main changes shall be listed here. A detailed message log
+ * is saved in svn log and on the tracker system since every svn login message
+ * shalle indicate the related tracker id.
+ *
+ * PLEASE REMOVE THIS COMMENT
+ *****************************************************************************/
+/*
+ * modification history (new versions first)
+ * -----------------------------------------------------------
+ * 20140608 v0.1.1 PR	First version for LPC4337 microcontroller.
+ */
 
 /*==================[cpu macros]=============================================*/
-
-
+/*****************************************************************************
+ * Please define here all cpu macros available for this cputype. armv7-m and
+ * cpy family stm32f4 is given as example, please remove all armv7-m and
+ * stm32f4 related macros
+ *
+ * PLEASE REMOVE THIS COMMENT
+ *****************************************************************************/
+/** \brief stm32f4 cpu definition */
+//#define stm32f4 	1
 
 /*==================[inclusions]=============================================*/
-
-#include "core_cm0plus.h"
+/*****************************************************************************
+ * Include the right macros for every cpu. Please remove all arm7 and lpc2xxx
+ * related macros.
+ *
+ * PLEASE REMOVE THIS COMMENT
+ *****************************************************************************/
 
 /*==================[macros]=================================================*/
-
-
+/*****************************************************************************
+ * use this section to defined any necessary macros for a specific cpu of
+ * your family.
+ *
+ * PLEASE REMOVE THIS COMMENT
+ *****************************************************************************/
 
 /*==================[typedef]================================================*/
-
-
+/*****************************************************************************
+ * use this section to defined any necessary types for a specific cpu of
+ * your family.
+ *
+ * PLEASE REMOVE THIS COMMENT
+ *****************************************************************************/
 
 /*==================[external data declaration]==============================*/
-
-
+/*****************************************************************************
+ * use this section to declare any necessary variables for a specific cpu of
+ * your family.
+ *
+ * PLEASE REMOVE THIS COMMENT
+ *****************************************************************************/
 
 /*==================[external functions declaration]=========================*/
-
-
-
 void StartOs_Arch_Cpu(void);
-
-
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
 #endif /* #ifndef _OS_INTERNAL_ARCH_CPU_H_ */
+

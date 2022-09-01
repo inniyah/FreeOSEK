@@ -57,6 +57,7 @@
 #include "stdlib.h"     /* used to call exit to terminate the process */
 #include "time.h"       /* used to simulate the hardware timer */
 #include "string.h"     /* used to call the function strerror */
+#include "pthread.h"    /* needed for pthread_t */
 
 /*==================[macros]=================================================*/
 /** \brief Extra size reserved for each stack
@@ -195,6 +196,7 @@
    TasksConst[(task)].TaskContext->tss_eip = (uint32)TasksConst[(task)].EntryPoint;                                   \
 }
 #endif
+
 /** \brief */
 #if ( CPUTYPE == ia64 )
 #define ResetStack(task)                                                                                              \
