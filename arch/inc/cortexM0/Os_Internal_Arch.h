@@ -85,14 +85,18 @@
  ** This macro will be used internally by the OS in any part of code that
  ** has to be executed atomic.
  **/
-#define IntSecure_Start()                       { SuspendAllInterrupts(); }
+#define IntSecure_Start() {                                                   \
+    SuspendAllInterrupts();                                                   \
+}
 
 
 /** \brief Interrupt Secure End Macro
  **
  ** This macro is the counter part of IntSecure_Start()
  **/
-#define IntSecure_End()                         { ResumeAllInterrupts(); }
+#define IntSecure_End() {                                                     \
+    ResumeAllInterrupts();                                                    \
+}
 
 
 /** \brief osekpause
@@ -108,11 +112,12 @@
  ** occurs, like for example an interrupt.
  **
  **/
-#define osekpause()                             { __asm volatile("wfi"); }
+#define osekpause() {                                                         \
+    __asm volatile("wfi");                                                    \
+}
 
 
-#define InvokePendSV()                                                        \
-{                                                                             \
+#define InvokePendSV() {                                                      \
    __asm__ __volatile__ (                                                     \
       /* Call PendSV */                                                       \
       "push {r0-r2}                                               \n\t"       \
@@ -129,32 +134,35 @@
 
 /** \brief CortexM0 implementation of the CallTask() OS interface.
  **/
-#define CallTask(currentTask, nextTask)         { InvokePendSV(); }
+#define CallTask(currentTask, nextTask) {                                      \
+    InvokePendSV();                                                            \
+}
 
 
 /** \brief CortexM0 implementation of the JmpTask() OS interface.
  **/
-#define JmpTask(nextTask)                       { InvokePendSV(); }
+#define JmpTask(nextTask) {                                                   \
+   InvokePendSV();                                                            \
+}
 
 
 /** \brief CortexM0 implementation of the SaveContext() OS interface.
  */
-#define SaveContext(task)                       {   }
+#define SaveContext(task) {                                                   \
+}
 
 
 /** \brief CortexM0 implementation of the ResetStack() OS interface.
  */
-#define ResetStack_Arch(taskId)                 \
-{                                               \
-   cortexM0ResetTaskContext(taskId);            \
+#define ResetStack_Arch(taskId) {                                             \
+   cortexM0ResetTaskContext(taskId);                                          \
 }
 
 
 /** \brief CortexM0 implementation of the SenEntryPoint() OS interface.
  **/
-#define SetEntryPoint(taskId)          \
-{                                      \
-   cortexM0TerminatedTaskID = taskId;  \
+#define SetEntryPoint(taskId) {                                               \
+   cortexM0TerminatedTaskID = taskId;                                         \
 }
 
 
@@ -163,7 +171,9 @@
  ** Enable OS configured interrupts (ISR1 and ISR2). This macro
  ** is called only ones in StartUp.c function.
  **/
-#define EnableOSInterrupts()                    { __asm volatile("cpsie i"); }
+#define EnableOSInterrupts() {                                                \
+    __asm volatile("cpsie i");                                                \
+}
 
 
 /** \brief Enable Interruptions
@@ -174,14 +184,18 @@
  ** This macro may be empty. Maybe will be removed on the future,
  ** please use it only if necessary, in other case use EnableOSInterrupts.
  **/
-#define EnableInterrupts()                      { EnableOSInterrupts(); }
+#define EnableInterrupts() {                                                  \
+    EnableOSInterrupts();                                                     \
+}
 
 
 /** \brief Disable OS Interruptions
  **
  ** Disable OS configured interrupts (ISR1 and ISR2).
  **/
-#define DisableOSInterrupts()                   { __asm volatile("cpsid i"); }
+#define DisableOSInterrupts() {                                               \
+    __asm volatile("cpsid i");                                                \
+}
 
 
 /** \brief Disable Interruptions
@@ -192,7 +206,9 @@
  ** This macro may be empty. Maybe will be removed on the future,
  ** please use it only if necessary, in other case use DisableOSInterrupts.
  **/
-#define DisableInterrupts()                     { DisableOSInterrupts(); }
+#define DisableInterrupts() {                                                 \
+    DisableOSInterrupts();                                                    \
+}
 
 
 /** \brief Get Counter Actual Value
@@ -202,7 +218,7 @@
  ** \param[in] CounterID id of the counter to be readed
  ** \return Actual value of the counter
  **/
-#define GetCounter_Arch(CounterID)              (CountersVar[CounterID].Time)
+#define GetCounter_Arch(CounterID) (CountersVar[CounterID].Time)
 
 
 /** \brief Pre ISR Macro
@@ -216,7 +232,9 @@
  **
  ** This macro is called every time that an ISR Cat 2 is finished
  **/
-#define PostIsr2_Arch(isr)                      { Schedule_WOChecks(); }
+#define PostIsr2_Arch(isr) {                                                  \
+    Schedule_WOChecks();                                                      \
+}
 
 
 /** \brief ShutdownOs Arch service
@@ -224,7 +242,8 @@
  ** This macro is called on the ShutdownOS to perform the architecture
  ** dependent shutdown actions.
  **/
-#define ShutdownOs_Arch()
+#define ShutdownOs_Arch() {                                                   \
+}
 
 
 

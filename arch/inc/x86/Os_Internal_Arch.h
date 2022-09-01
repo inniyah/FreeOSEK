@@ -324,7 +324,7 @@
 /*==================[typedef]================================================*/
 
 /*==================[external data declaration]==============================*/
-/** \brief Interrupt Falg
+/** \brief Interrupt Flag
  **
  ** This variable indicate the state of the Os interrupts. If bit 0 is set
  ** interrupt 0 has been activated, if bit 1 is set interrupt 1 has been
@@ -371,7 +371,7 @@ extern uint32 OsStack;
 #error Unknown CPUTYPE for ARCH x86
 #endif /* #if ( CPUTYPE == ia64 ) */
 #else /* #ifdef CPUTYPE */
-#error CPUTPYE is not defined
+#error CPUTYPE is not defined
 #endif /* #idef CPUTYPE */
 
 

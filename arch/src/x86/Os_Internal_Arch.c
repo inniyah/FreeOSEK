@@ -90,7 +90,7 @@ uint32 OsekStack;
 #error Unknown CPUTYPE for ARCH x86
 #endif /* #if ( CPUTYPE == ia64 ) */
 #else /* #ifdef CPUTYPE */
-#error CPUTPYE is not defined
+#error CPUTYPE is not defined
 #endif /* #idef CPUTYPE */
 
 /*==================[internal functions definition]==========================*/
