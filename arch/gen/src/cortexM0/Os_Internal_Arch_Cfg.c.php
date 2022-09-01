@@ -78,7 +78,7 @@ extern void ResetISR(void);
 <?php
  switch ($this->definitions["CPU"])
 {
-	case "thumb":
+	case "qemu":
 		echo "extern void __stack(void);\n";
 		break;
 	case "lpc4337":
@@ -111,7 +111,7 @@ if ($this->definitions["ARCH"] == "cortexM0")
 {
    switch ($this->definitions["CPU"])
    {
-      case "thumb":
+      case "qemu":
          echo "extern void SysTick_Handler(void);\n";
          break;
       case "lpc4337":
@@ -155,7 +155,7 @@ void DebugMon_Handler(void) {
 <?php
 switch ($this->definitions["CPU"])
 {
-   case "thumb":
+   case "qemu":
       $intList = array (
          0 => "RESERVED16",
          1 => "RESERVED17",
@@ -284,7 +284,7 @@ $MAX_INT_COUNT = max(array_keys($intList))+1;
 __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) = {
 
-<?php if ($this->definitions["CPU"] == "thumb") : ?>
+<?php if ($this->definitions["CPU"] == "qemu") : ?>
 
    /* System ISRs */
    &__stack,                       /* The initial stack pointer  */

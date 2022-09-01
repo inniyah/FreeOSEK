@@ -1,7 +1,7 @@
 #!/usr/bin/env -S make -f
 
-APP_NAME=app.arm_qemu
-APP_SUBDIR=app.arm_qemu
+APP_NAME=app.qemu-thumb
+APP_SUBDIR=app.qemu-thumb
 
 ## ARCH, CPUTYPE and CPU following are supported
 ## +--------------+---------------+----------------+--------------+---------------+
@@ -22,7 +22,7 @@ APP_SUBDIR=app.arm_qemu
 
 ARCH= cortexM0
 CPUTYPE= thumb
-CPU= thumb
+CPU= qemu
 
 ARCH_SUBDIR?= $(ARCH)
 CPUTYPE_SUBDIR?= $(CPUTYPE)

@@ -248,7 +248,7 @@ void InitStack_Arch(uint8 TaskID)
 }
 
 
-#if (CPU_LPC4337 == CPU)
+#if (CPUTYPE_LPC43XX == CPUTYPE && CPU_LPC4337 == CPU)
 
 /* Cortex-M0 core of LPC4337 uses RIT Timer for periodic IRQ */
 void RIT_IRQHandler(void) {
@@ -309,9 +309,9 @@ void RIT_IRQHandler(void) {
    }
 }
 
-#endif /* CPU == lpc4337 */
+#endif /* CPUTYPE_LPC43XX == CPUTYPE && CPU_LPC4337 == CPU */
 
-#if (CPU == CPU_SKEAZN642)
+#if (CPUTYPE_KEA64 == CPUTYPE && CPU_SKEAZN642 == CPU)
 
 void SysTick_Handler(void) {
     /* Store the calling context in a variable. */
@@ -361,9 +361,9 @@ void SysTick_Handler(void) {
     NVIC_ClearPendingIRQ(SysTick_IRQn);
 }
 
-#endif /* CPU == CPU_SKEAZN642 */
+#endif /* CPUTYPE_KEA64 == CPUTYPE && CPU_SKEAZN642 == CPU */
 
-#if (CPU_THUMB == CPU)
+#if (CPUTYPE_THUMB == CPUTYPE && CPU_QEMU == CPU)
 
 #include "systick.h"
 
@@ -416,7 +416,7 @@ void SysTick_Handler(void) {
     SYSTICK_CLEAN_IRQ();
 }
 
-#endif /* CPU_THUMB == CPU */
+#endif /* CPUTYPE_THUMB == CPUTYPE && CPU_QEMU == CPU */
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */

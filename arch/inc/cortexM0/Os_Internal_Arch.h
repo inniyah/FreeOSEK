@@ -54,7 +54,7 @@
 
 
 
-#if (defined(DEBUG) && CPU_THUMB == CPU)
+#if (defined(DEBUG) && CPU_QEMU == CPU)
 #include "printf.h"
 #define PRINTF(fmt, ...) printf(fmt, ##__VA_ARGS__)
 #else

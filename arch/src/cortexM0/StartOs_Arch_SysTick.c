@@ -54,11 +54,11 @@
 #include "ciaaPlatforms.h"
 
 
-#if (CPU_LPC4337 == CPU)
+#if (CPUTYPE_LPC43XX == CPUTYPE)
 #include "chip.h"
 #endif
 
-#if (CPU_THUMB == CPU)
+#if (CPUTYPE_THUMB == CPUTYPE && CPU_QEMU == CPU)
 #include "systick.h"
 #endif
 
@@ -92,7 +92,7 @@
 
 void StartOs_Arch_SysTick(void) {
 
-#if (CPU_LPC4337 == CPU)
+#if (CPUTYPE_LPC43XX == CPUTYPE && CPU_LPC4337 == CPU)
 
 	/* Enable and Set priority for PendSV irq */
 	NVIC_EnableIRQ(PendSV_IRQn); /*TODO Check if this is necessary*/
@@ -107,7 +107,7 @@ void StartOs_Arch_SysTick(void) {
 	NVIC_EnableIRQ(RITIMER_IRQn);
 	NVIC_SetPriority(RITIMER_IRQn, (1<<__NVIC_PRIO_BITS) - 1);
 
-#elif (CPU_SKEAZN642 == CPU)
+#elif (CPUTYPE_KEA64 == CPUTYPE && CPU_SKEAZN642 == CPU)
 
 	/* Enable and Set priority for PendSV irq */
 	NVIC_EnableIRQ(PendSV_IRQn); /*TODO Check if this is necessary*/
@@ -124,7 +124,7 @@ void StartOs_Arch_SysTick(void) {
 	NVIC_EnableIRQ(SysTick_IRQn);
 	NVIC_SetPriority (SysTick_IRQn, (1<<__NVIC_PRIO_BITS) - 1);  /* set Priority for Systick Interrupt */
 
-#elif (CPU_THUMB == CPU)
+#elif (CPUTYPE_THUMB == CPUTYPE && CPU_QEMU == CPU)
 
     SYSTICK_SETUP();
 

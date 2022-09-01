@@ -99,10 +99,10 @@ extern "C" {
 #define CPUTYPE_PIC32   0xB000008
 
 #define CPU_NONE        0xC000000
-#define CPU_LPC4337     0xC000001
-#define CPU_SPC560D     0xC000002
-#define CPU_SKEAZN642   0xC000003
-#define CPU_THUMB       0xC000004
+#define CPU_QEMU        0xC000001
+#define CPU_LPC4337     0xC000002
+#define CPU_SPC560D     0xC000003
+#define CPU_SKEAZN642   0xC000004
 
 
 /****** ARCH macro definitions ******/
@@ -227,7 +227,7 @@ extern "C" {
 #elif ( ( ARCH == ARCH_MIPS )     && ( CPUTYPE == CPUTYPE_PIC32 )   && ( CPU == pic32mz ) )
 #elif ( ( ARCH == ARCH_CORTEXM4 ) && ( CPUTYPE == lpc5410x )        && ( CPU == lpc54102 ) )
 #elif ( ( ARCH == ARCH_SPARCV8 )  && ( CPUTYPE == leon3 )           && ( CPU == leon3nfp ) )
-#elif ( ( ARCH == ARCH_CORTEXM0 ) && ( CPUTYPE == CPUTYPE_THUMB )   && ( CPU == CPU_THUMB ) )
+#elif ( ( ARCH == ARCH_CORTEXM0 ) && ( CPUTYPE == CPUTYPE_THUMB )   && ( CPU == CPU_QEMU ) )
 #elif ( ( ARCH == ARCH_CORTEXM0 ) && ( CPUTYPE == CPUTYPE_KEA64 )   && ( CPU == CPU_SKEAZN642 ) )
 #elif ( ( ARCH == ARCH_LINUX )    && ( CPUTYPE == CPUTYPE_POSIX )   && ( CPU == CPU_NONE ) )
 #else
