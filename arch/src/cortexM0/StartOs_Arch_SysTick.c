@@ -89,8 +89,7 @@
 
 #if (CPU_LPC4337 == CPU)
 
-void StartOs_Arch_SysTick(void)
-{
+void StartOs_Arch_SysTick(void) {
    /* Set lowest priority for PendSV */
    NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
 
@@ -112,11 +111,8 @@ void StartOs_Arch_SysTick(void)
 
 #include "systick.h"
 
-void StartOs_Arch_SysTick(void)
-{
-    PUT32(SYSTICK_CTRL_REG,   0x00000004);
-    PUT32(SYSTICK_RELOAD_REG, 1000 - 1);   // Set the Reload value for required tick in STRELOAD.
-    PUT32(SYSTICK_CTRL_REG,   0x00000007); // Enabled Systick Module, Select the CPU Clock Source and enable the SysTick interrupt
+void StartOs_Arch_SysTick(void) {
+    SYSTICK_SETUP()
 }
 
 #endif /* CPU_THUMB == CPU */

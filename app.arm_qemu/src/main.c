@@ -26,6 +26,12 @@ void puts( const char * str ) {
     }
 }
 
+#define CYCLES_PER_LOOP 3
+inline void wait_cycles( uint32_t n ) {
+    uint32_t l = n / CYCLES_PER_LOOP;
+    asm volatile( "0:" "SUBS %[count], 1;" "BNE 0b;" :[count]"+r"(l) );
+}
+
 #if 0
 void SysTick_Handler ( void ) {
     _putchar('*');
@@ -71,6 +77,7 @@ TASK(InitTask) {
     */
    SetRelAlarm(ActivatePeriodicTask, 350, 1000);
 
+    puts("[End of InitTask]\n");
    TerminateTask();
 }
 
@@ -83,6 +90,7 @@ TASK(InitTask) {
 TASK(PeriodicTask) {
     puts("[PeriodicTask]\n");
 
+    puts("[End of PeriodicTask]\n");
     TerminateTask();
 }
 
@@ -94,11 +102,14 @@ TASK(MyTask) {
     puts("[MyTask]\n");
 
     while (TRUE) {
-        puts("[Low Prio Task]\n");
-        //~ msleep(100);
-        Schedule();
+        puts("[Low Prio Loop]\n");
+        for (unsigned int i = 0; i < 10000u; i++) {
+            wait_cycles(10000u);
+            Schedule();
+        }
     }
 
+    puts("[End of MyTask]\n");
     TerminateTask();
 }
 
